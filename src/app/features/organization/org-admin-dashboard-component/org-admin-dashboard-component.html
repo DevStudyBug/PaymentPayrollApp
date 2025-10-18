@@ -11,48 +11,75 @@
     </div>
 
     <nav class="sidebar-nav">
-      <button class="nav-item" [class.active]="activeTab === 'dashboard'" [class.disabled]="false"
-        (click)="switchTab('dashboard')">
+      <button
+        class="nav-item"
+        [class.active]="activeTab === 'dashboard'"
+        [class.disabled]="false"
+        (click)="switchTab('dashboard')"
+      >
         <span class="nav-icon">📊</span>
         <span class="nav-label">Dashboard</span>
       </button>
 
-      <button class="nav-item" [class.active]="activeTab === 'designations'" [class.disabled]="!canAccessFeature()"
-        (click)="switchTab('designations')">
+      <button
+        class="nav-item"
+        [class.active]="activeTab === 'designations'"
+        [class.disabled]="!canAccessFeature()"
+        (click)="switchTab('designations')"
+      >
         <span class="nav-icon">👔</span>
         <span class="nav-label">Designations</span>
         <span *ngIf="!canAccessFeature()" class="lock-icon">🔒</span>
       </button>
 
-      <button class="nav-item" [class.active]="activeTab === 'templates'" [class.disabled]="!canAccessFeature()"
-        (click)="switchTab('templates')">
+      <button
+        class="nav-item"
+        [class.active]="activeTab === 'templates'"
+        [class.disabled]="!canAccessFeature()"
+        (click)="switchTab('templates')"
+      >
         <span class="nav-icon">📋</span>
         <span class="nav-label">Salary Templates</span>
         <span *ngIf="!canAccessFeature()" class="lock-icon">🔒</span>
       </button>
 
-      <button class="nav-item" [class.active]="activeTab === 'employees'" [class.disabled]="!canAccessFeature()"
-        (click)="switchTab('employees')">
+      <button
+        class="nav-item"
+        [class.active]="activeTab === 'employees'"
+        [class.disabled]="!canAccessFeature()"
+        (click)="switchTab('employees')"
+      >
         <span class="nav-icon">👥</span>
         <span class="nav-label">Employees</span>
         <span *ngIf="!canAccessFeature()" class="lock-icon">🔒</span>
       </button>
 
-      <button class="nav-item" [class.active]="activeTab === 'payroll'" [class.disabled]="!canAccessFeature()"
-        (click)="switchTab('payroll')">
+      <button
+        class="nav-item"
+        [class.active]="activeTab === 'payroll'"
+        [class.disabled]="!canAccessFeature()"
+        (click)="switchTab('payroll')"
+      >
         <span class="nav-icon">💰</span>
         <span class="nav-label">Payroll</span>
         <span *ngIf="!canAccessFeature()" class="lock-icon">🔒</span>
       </button>
-      <button class="nav-item" [class.active]="activeTab === 'vendors'" [class.disabled]="!canAccessFeature()"
-        (click)="switchTab('vendors')">
+      <button
+        class="nav-item"
+        [class.active]="activeTab === 'vendors'"
+        [class.disabled]="!canAccessFeature()"
+        (click)="switchTab('vendors')"
+      >
         <span class="nav-icon">🏢</span>
         <span class="nav-label">Vendors</span>
         <span *ngIf="!canAccessFeature()" class="lock-icon">🔒</span>
       </button>
-      <button class="nav-item" [class.active]="activeTab === 'concerns'" [class.disabled]="!canAccessFeature()"
-        (click)="switchTab('concerns')">
-
+      <button
+        class="nav-item"
+        [class.active]="activeTab === 'concerns'"
+        [class.disabled]="!canAccessFeature()"
+        (click)="switchTab('concerns')"
+      >
         <span class="nav-icon">🎫</span>
         <span class="nav-label">Support Tickets</span>
         <span *ngIf="!canAccessFeature()" class="lock-icon">🔒</span>
@@ -76,7 +103,9 @@
       <div class="header-actions">
         <div class="user-info">
           <span class="user-avatar">👤</span>
-          <span class="user-name">Admin Account</span>
+          <span class="user-name">{{
+            onboardingStatus?.organizationName || 'Organization Admin'
+          }}</span>
         </div>
       </div>
     </header>
@@ -145,7 +174,10 @@
             <h3>Organization Status</h3>
           </div>
           <div class="status-content">
-            <div class="status-badge-large" [ngClass]="onboardingStatus?.organizationStatus?.toLowerCase()">
+            <div
+              class="status-badge-large"
+              [ngClass]="onboardingStatus?.organizationStatus?.toLowerCase()"
+            >
               {{ onboardingStatus?.organizationStatus || 'PENDING' }}
             </div>
             <p class="status-message">
@@ -192,11 +224,14 @@
               <!-- Header -->
               <div class="doc-header">
                 <strong class="doc-name">{{ doc.documentName }}</strong>
-                <span class="badge" [ngClass]="{
+                <span
+                  class="badge"
+                  [ngClass]="{
                     approved: doc.status === 'APPROVED',
                     pending: doc.status === 'PENDING',
                     rejected: doc.status === 'REJECTED'
-                  }">
+                  }"
+                >
                   {{ doc.status }}
                 </span>
               </div>
@@ -210,8 +245,12 @@
 
                 <div class="reupload">
                   <label>Re-upload:</label>
-                  <input type="file" class="file-input" (change)="onRejectedFileSelected($event, doc)"
-                    accept=".pdf,.png,.jpg,.jpeg" />
+                  <input
+                    type="file"
+                    class="file-input"
+                    (change)="onRejectedFileSelected($event, doc)"
+                    accept=".pdf,.png,.jpg,.jpeg"
+                  />
                 </div>
               </div>
             </div>
@@ -234,11 +273,14 @@
               </div>
               <span class="status-item-value">{{
                 onboardingStatus?.bankStage || 'NOT SUBMITTED'
-                }}</span>
+              }}</span>
             </div>
-            <div *ngIf="
+            <div
+              *ngIf="
                 onboardingStatus?.bankStage === 'REJECTED' && onboardingStatus?.bankRejectionReason
-              " class="rejection-reason">
+              "
+              class="rejection-reason"
+            >
               ❌ <strong>Reason:</strong> {{ onboardingStatus.bankRejectionReason }}
             </div>
             <div class="status-item" *ngIf="onboardingStatus?.bankVerifiedBy">
@@ -263,12 +305,16 @@
             <h4>Upload Documents</h4>
             <p>Submit required organization documents for verification</p>
 
-            <button class="btn btn-primary" (click)="openDocumentModal()" [disabled]="shouldBlurDocumentAction()"
+            <button
+              class="btn btn-primary"
+              (click)="openDocumentModal()"
+              [disabled]="shouldBlurDocumentAction()"
               [title]="
                 shouldBlurDocumentAction()
                   ? 'Cannot upload now — please reupload rejected documents individually.'
                   : 'Upload new documents'
-              ">
+              "
+            >
               Upload Now
             </button>
           </div>
@@ -278,7 +324,11 @@
             <div class="action-icon">🏦</div>
             <h4>Add Bank Details</h4>
             <p>Provide bank account information for payroll processing</p>
-            <button class="btn btn-primary" (click)="openBankModal()" [disabled]="isBankDetailsDisabled()">
+            <button
+              class="btn btn-primary"
+              (click)="openBankModal()"
+              [disabled]="isBankDetailsDisabled()"
+            >
               {{ isBankDetailsDisabled() ? 'In Review / Uploaded' : 'Add Details' }}
             </button>
           </div>
@@ -300,16 +350,28 @@
         <form [formGroup]="designationForm" (ngSubmit)="addDesignation()">
           <div class="form-group">
             <label for="designationName">Designation Name <span class="required">*</span></label>
-            <input type="text" id="designationName" formControlName="name"
-              placeholder="e.g., Software Engineer, Manager" class="form-input" [class.error]="
+            <input
+              type="text"
+              id="designationName"
+              formControlName="name"
+              placeholder="e.g., Software Engineer, Manager"
+              class="form-input"
+              [class.error]="
                 designationForm.get('name')?.invalid && designationForm.get('name')?.touched
-              " />
-            <span *ngIf="designationForm.get('name')?.invalid && designationForm.get('name')?.touched"
-              class="error-text">
+              "
+            />
+            <span
+              *ngIf="designationForm.get('name')?.invalid && designationForm.get('name')?.touched"
+              class="error-text"
+            >
               ⚠️ Designation name is required (minimum 2 characters)
             </span>
           </div>
-          <button type="submit" class="btn btn-primary" [disabled]="isLoading || designationForm.invalid">
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="isLoading || designationForm.invalid"
+          >
             <span *ngIf="!isLoading">✓ Add Designation</span>
             <span *ngIf="isLoading" class="loading-spinner"></span>
           </button>
@@ -327,19 +389,15 @@
               <tr>
                 <th>ID</th>
                 <th>Designation Name</th>
-                <th class="text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let designation of designations; let i = index" [@fadeIn]>
+              <tr *ngFor="let designation of designations; let i = index">
                 <td>
                   <span class="id-badge">#{{ designation.designationId }}</span>
                 </td>
                 <td>
                   <strong>{{ designation.name }}</strong>
-                </td>
-                <td class="text-right">
-                  <button class="btn btn-sm btn-secondary">✏️ Edit</button>
                 </td>
               </tr>
             </tbody>
@@ -377,35 +435,69 @@
             </div>
             <div class="form-group">
               <label for="basicSalary">Basic Salary (₹) <span class="required">*</span></label>
-              <input type="number" id="basicSalary" formControlName="basicSalary" placeholder="0.00"
-                class="form-input" />
+              <input
+                type="number"
+                id="basicSalary"
+                formControlName="basicSalary"
+                placeholder="0.00"
+                class="form-input"
+              />
             </div>
           </div>
 
           <div class="form-row">
             <div class="form-group">
               <label for="hra">HRA (₹) <span class="required">*</span></label>
-              <input type="number" id="hra" formControlName="hra" placeholder="0.00" class="form-input" />
+              <input
+                type="number"
+                id="hra"
+                formControlName="hra"
+                placeholder="0.00"
+                class="form-input"
+              />
             </div>
             <div class="form-group">
               <label for="da">DA (₹) <span class="required">*</span></label>
-              <input type="number" id="da" formControlName="da" placeholder="0.00" class="form-input" />
+              <input
+                type="number"
+                id="da"
+                formControlName="da"
+                placeholder="0.00"
+                class="form-input"
+              />
             </div>
           </div>
 
           <div class="form-row">
             <div class="form-group">
               <label for="pf">PF (₹) <span class="required">*</span></label>
-              <input type="number" id="pf" formControlName="pf" placeholder="0.00" class="form-input" />
+              <input
+                type="number"
+                id="pf"
+                formControlName="pf"
+                placeholder="0.00"
+                class="form-input"
+              />
             </div>
             <div class="form-group">
-              <label for="otherAllowances">Other Allowances (₹) <span class="required">*</span></label>
-              <input type="number" id="otherAllowances" formControlName="otherAllowances" placeholder="0.00"
-                class="form-input" />
+              <label for="otherAllowances"
+                >Other Allowances (₹) <span class="required">*</span></label
+              >
+              <input
+                type="number"
+                id="otherAllowances"
+                formControlName="otherAllowances"
+                placeholder="0.00"
+                class="form-input"
+              />
             </div>
           </div>
 
-          <button type="submit" class="btn btn-primary" [disabled]="isLoading || salaryTemplateForm.invalid">
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="isLoading || salaryTemplateForm.invalid"
+          >
             <span *ngIf="!isLoading">✓ Create Template</span>
             <span *ngIf="isLoading" class="loading-spinner"></span>
           </button>
@@ -443,7 +535,9 @@
                   <span class="amount success">₹{{ template.netSalary | number : '1.2-2' }}</span>
                 </td>
                 <td class="text-right">
-                  <button class="btn btn-sm btn-secondary" (click)="viewSalaryTemplate(template)">👁️ View</button>
+                  <button class="btn btn-sm btn-secondary" (click)="viewSalaryTemplate(template)">
+                    👁️ View
+                  </button>
                 </td>
               </tr>
             </tbody>
@@ -457,11 +551,19 @@
 
         <!-- Pagination -->
         <div class="pagination" *ngIf="totalPages > 1">
-          <button class="btn btn-sm btn-secondary" (click)="previousPage()" [disabled]="currentPage === 0">
+          <button
+            class="btn btn-sm btn-secondary"
+            (click)="previousPage()"
+            [disabled]="currentPage === 0"
+          >
             ← Previous
           </button>
           <span class="page-info">Page {{ currentPage + 1 }} of {{ totalPages }}</span>
-          <button class="btn btn-sm btn-secondary" (click)="nextPage()" [disabled]="currentPage >= totalPages - 1">
+          <button
+            class="btn btn-sm btn-secondary"
+            (click)="nextPage()"
+            [disabled]="currentPage >= totalPages - 1"
+          >
             Next →
           </button>
         </div>
@@ -487,32 +589,53 @@
             <div class="form-row">
               <div class="form-group">
                 <label for="firstName">First Name <span class="required">*</span></label>
-                <input type="text" id="firstName" formControlName="firstName" placeholder="First Name"
-                  class="form-input">
+                <input
+                  type="text"
+                  id="firstName"
+                  formControlName="firstName"
+                  placeholder="First Name"
+                  class="form-input"
+                />
               </div>
               <div class="form-group">
                 <label for="lastName">Last Name <span class="required">*</span></label>
-                <input type="text" id="lastName" formControlName="lastName" placeholder="Last Name" class="form-input">
+                <input
+                  type="text"
+                  id="lastName"
+                  formControlName="lastName"
+                  placeholder="Last Name"
+                  class="form-input"
+                />
               </div>
             </div>
 
             <div class="form-row">
               <div class="form-group">
                 <label for="dob">Date of Birth <span class="required">*</span></label>
-                <input type="date" id="dob" formControlName="dob" class="form-input">
+                <input type="date" id="dob" formControlName="dob" class="form-input" />
               </div>
               <div class="form-group">
                 <label for="email">Email <span class="required">*</span></label>
-                <input type="email" id="email" formControlName="email" placeholder="email@example.com"
-                  class="form-input">
+                <input
+                  type="email"
+                  id="email"
+                  formControlName="email"
+                  placeholder="email@example.com"
+                  class="form-input"
+                />
               </div>
             </div>
 
             <div class="form-row">
               <div class="form-group">
                 <label for="department">Department <span class="required">*</span></label>
-                <input type="text" id="department" formControlName="department" placeholder="Department"
-                  class="form-input">
+                <input
+                  type="text"
+                  id="department"
+                  formControlName="department"
+                  placeholder="Department"
+                  class="form-input"
+                />
               </div>
               <div class="form-group">
                 <label for="designation">Designation <span class="required">*</span></label>
@@ -525,7 +648,11 @@
               </div>
             </div>
 
-            <button type="submit" class="btn btn-primary btn-block" [disabled]="isLoading || employeeForm.invalid">
+            <button
+              type="submit"
+              class="btn btn-primary btn-block"
+              [disabled]="isLoading || employeeForm.invalid"
+            >
               <span *ngIf="!isLoading">✓ Register Employee</span>
               <span *ngIf="isLoading" class="loading-spinner"></span>
             </button>
@@ -542,8 +669,13 @@
             <p>Upload an Excel file (.xlsx, .xls) with employee details</p>
             <label for="excelFile" class="btn btn-primary">
               Choose File
-              <input type="file" id="excelFile" accept=".xlsx,.xls" (change)="uploadEmployeesExcel($event)"
-                style="display: none;">
+              <input
+                type="file"
+                id="excelFile"
+                accept=".xlsx,.xls"
+                (change)="uploadEmployeesExcel($event)"
+                style="display: none"
+              />
             </label>
             <small class="file-hint">Supported formats: .xlsx, .xls</small>
           </div>
@@ -569,8 +701,12 @@
             </thead>
             <tbody>
               <tr *ngFor="let emp of employees">
-                <td><span class="id-badge">#{{ emp.employeeId }}</span></td>
-                <td><strong>{{ emp.employeeName }}</strong></td>
+                <td>
+                  <span class="id-badge">#{{ emp.employeeId }}</span>
+                </td>
+                <td>
+                  <strong>{{ emp.employeeName }}</strong>
+                </td>
                 <td>{{ emp.email }}</td>
                 <td>
                   <span class="status-badge" [ngClass]="emp.status?.toLowerCase()">
@@ -580,13 +716,19 @@
                 <td>
                   <div class="inline-progress">
                     <div class="progress-bar mini">
-                      <div class="progress-fill" [style.width.%]="emp.documentCompletion || 0"></div>
+                      <div
+                        class="progress-fill"
+                        [style.width.%]="emp.documentCompletion || 0"
+                      ></div>
                     </div>
                     <span class="progress-text">{{ emp.documentCompletion || 0 }}%</span>
                   </div>
                 </td>
                 <td class="text-right">
-                  <button class="btn btn-sm btn-secondary" (click)="viewEmployeeDetails(emp.employeeId)">
+                  <button
+                    class="btn btn-sm btn-secondary"
+                    (click)="viewEmployeeDetails(emp.employeeId)"
+                  >
                     👁️ View
                   </button>
                 </td>
@@ -619,11 +761,19 @@
             <input type="month" id="payrollMonth" #monthInput class="form-input" />
           </div>
           <div class="button-group">
-            <button class="btn btn-primary btn-lg" (click)="generatePayroll(monthInput.value)" [disabled]="isLoading">
+            <button
+              class="btn btn-primary btn-lg"
+              (click)="generatePayroll(monthInput.value)"
+              [disabled]="isLoading"
+            >
               <span *ngIf="!isLoading">🔄 Generate Payroll</span>
               <span *ngIf="isLoading" class="loading-spinner"></span>
             </button>
-            <button class="btn btn-success btn-lg" (click)="submitPayroll(monthInput.value)" [disabled]="isLoading">
+            <button
+              class="btn btn-success btn-lg"
+              (click)="submitPayroll(monthInput.value)"
+              [disabled]="isLoading"
+            >
               <span *ngIf="!isLoading">🏦 Submit to Bank</span>
               <span *ngIf="isLoading" class="loading-spinner"></span>
             </button>
@@ -678,9 +828,12 @@
                 </td>
                 <td>{{ concern.createdAt | date : 'short' }}</td>
                 <td class="text-right">
-                 <button class="btn btn-sm btn-secondary" (click)="viewConcern(concern.ticketNumber)">
-  👁️ View
-</button>
+                  <button
+                    class="btn btn-sm btn-secondary"
+                    (click)="viewConcern(concern.ticketNumber)"
+                  >
+                    👁️ View
+                  </button>
                 </td>
               </tr>
             </tbody>
@@ -694,11 +847,19 @@
 
         <!-- Pagination -->
         <div class="pagination" *ngIf="totalPages > 1">
-          <button class="btn btn-sm btn-secondary" (click)="previousPage()" [disabled]="currentPage === 0">
+          <button
+            class="btn btn-sm btn-secondary"
+            (click)="previousPage()"
+            [disabled]="currentPage === 0"
+          >
             ← Previous
           </button>
           <span class="page-info">Page {{ currentPage + 1 }} of {{ totalPages }}</span>
-          <button class="btn btn-sm btn-secondary" (click)="nextPage()" [disabled]="currentPage >= totalPages - 1">
+          <button
+            class="btn btn-sm btn-secondary"
+            (click)="nextPage()"
+            [disabled]="currentPage >= totalPages - 1"
+          >
             Next →
           </button>
         </div>
@@ -756,7 +917,10 @@
                   <button class="btn btn-sm btn-primary" (click)="openVendorModal(vendor)">
                     ✏️ Edit
                   </button>
-                  <button class="btn btn-sm btn-danger" (click)="deleteVendor(vendor.id, vendor.name)">
+                  <button
+                    class="btn btn-sm btn-danger"
+                    (click)="deleteVendor(vendor.id, vendor.name)"
+                  >
                     🗑️ Delete
                   </button>
                 </td>
@@ -814,7 +978,10 @@
                 </td>
                 <td>{{ request.createdAt | date : 'short' }}</td>
                 <td class="text-right">
-                  <button class="btn btn-sm btn-secondary" (click)="viewPaymentRequestDetails(request)">
+                  <button
+                    class="btn btn-sm btn-secondary"
+                    (click)="viewPaymentRequestDetails(request)"
+                  >
                     👁️ View
                   </button>
                 </td>
@@ -839,7 +1006,9 @@
             <div class="detail-section" *ngIf="selectedPaymentRequest">
               <div class="detail-row">
                 <span class="detail-label">Payment ID:</span>
-                <span class="detail-value"><strong>#{{ selectedPaymentRequest.paymentId }}</strong></span>
+                <span class="detail-value"
+                  ><strong>#{{ selectedPaymentRequest.paymentId }}</strong></span
+                >
               </div>
               <div class="detail-row">
                 <span class="detail-label">Organization:</span>
@@ -847,12 +1016,16 @@
               </div>
               <div class="detail-row">
                 <span class="detail-label">Vendor Name:</span>
-                <span class="detail-value"><strong>{{ selectedPaymentRequest.vendorName || 'N/A' }}</strong></span>
+                <span class="detail-value"
+                  ><strong>{{ selectedPaymentRequest.vendorName || 'N/A' }}</strong></span
+                >
               </div>
               <div class="detail-row">
                 <span class="detail-label">Amount:</span>
                 <span class="detail-value">
-                  <span class="amount">₹{{ selectedPaymentRequest.amount | number : '1.2-2' }}</span>
+                  <span class="amount"
+                    >₹{{ selectedPaymentRequest.amount | number : '1.2-2' }}</span
+                  >
                 </span>
               </div>
               <div class="detail-row">
@@ -868,22 +1041,31 @@
               <div class="detail-row">
                 <span class="detail-label">Status:</span>
                 <span class="detail-value">
-                  <span class="status-badge" [ngClass]="selectedPaymentRequest.status?.toLowerCase()">
+                  <span
+                    class="status-badge"
+                    [ngClass]="selectedPaymentRequest.status?.toLowerCase()"
+                  >
                     {{ selectedPaymentRequest.status }}
                   </span>
                 </span>
               </div>
               <div class="detail-row">
                 <span class="detail-label">Request Date:</span>
-                <span class="detail-value">{{ selectedPaymentRequest.requestDate | date : 'medium' }}</span>
+                <span class="detail-value">{{
+                  selectedPaymentRequest.requestDate | date : 'medium'
+                }}</span>
               </div>
               <div class="detail-row" *ngIf="selectedPaymentRequest.approvalDate">
                 <span class="detail-label">Approval Date:</span>
-                <span class="detail-value">{{ selectedPaymentRequest.approvalDate | date : 'medium' }}</span>
+                <span class="detail-value">{{
+                  selectedPaymentRequest.approvalDate | date : 'medium'
+                }}</span>
               </div>
               <div class="detail-row" *ngIf="selectedPaymentRequest.paymentRefNo">
                 <span class="detail-label">Payment Reference:</span>
-                <span class="detail-value"><strong>{{ selectedPaymentRequest.paymentRefNo }}</strong></span>
+                <span class="detail-value"
+                  ><strong>{{ selectedPaymentRequest.paymentRefNo }}</strong></span
+                >
               </div>
               <div class="detail-row" *ngIf="selectedPaymentRequest.remark">
                 <span class="detail-label">Remark:</span>
@@ -909,11 +1091,19 @@
       <div class="modal-body">
         <form [formGroup]="documentUploadForm">
           <div formArrayName="documents">
-            <div *ngFor="let doc of documentsArray.controls; let i = index" [formGroupName]="i" class="document-item">
+            <div
+              *ngFor="let doc of documentsArray.controls; let i = index"
+              [formGroupName]="i"
+              class="document-item"
+            >
               <div class="document-item-header">
                 <h4>Document {{ i + 1 }}</h4>
-                <button type="button" class="btn-icon" (click)="removeDocumentField(i)"
-                  *ngIf="documentsArray.length > 1">
+                <button
+                  type="button"
+                  class="btn-icon"
+                  (click)="removeDocumentField(i)"
+                  *ngIf="documentsArray.length > 1"
+                >
                   🗑️
                 </button>
               </div>
@@ -934,16 +1124,24 @@
               </div>
             </div>
           </div>
-          <button type="button" class="btn btn-secondary btn-block" (click)="addDocumentField()"
-            [disabled]="documentsArray.length >= 3" *ngIf="documentsArray.length < 3">
+          <button
+            type="button"
+            class="btn btn-secondary btn-block"
+            (click)="addDocumentField()"
+            [disabled]="documentsArray.length >= 3"
+            *ngIf="documentsArray.length < 3"
+          >
             ➕ Add Another Document
           </button>
         </form>
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" (click)="closeDocumentModal()">Cancel</button>
-        <button class="btn btn-primary" (click)="uploadDocuments()"
-          [disabled]="isLoading || documentUploadForm.invalid">
+        <button
+          class="btn btn-primary"
+          (click)="uploadDocuments()"
+          [disabled]="isLoading || documentUploadForm.invalid"
+        >
           <span *ngIf="!isLoading">✓ Upload Documents</span>
           <span *ngIf="isLoading" class="loading-spinner"></span>
         </button>
@@ -958,42 +1156,78 @@
         <h3>🏦 Bank Account Details</h3>
         <button class="modal-close" (click)="closeBankModal()">×</button>
       </div>
+      <div *ngIf="errorMessage" class="alert alert-error">
+        <span class="alert-icon">✕</span>
+        <span class="alert-message">{{ errorMessage }}</span>
+        <button class="close-btn" (click)="clearMessages()">×</button>
+      </div>
       <div class="modal-body">
         <form [formGroup]="bankDetailsForm">
           <div class="form-group">
             <label for="accountNumber">Account Number <span class="required">*</span></label>
-            <input type="text" id="accountNumber" formControlName="accountNumber" placeholder="Enter account number"
-              class="form-input" />
+            <input
+              type="text"
+              id="accountNumber"
+              formControlName="accountNumber"
+              placeholder="Enter account number"
+              class="form-input"
+            />
           </div>
 
           <div class="form-group">
             <label for="ifscCode">IFSC Code <span class="required">*</span></label>
-            <input type="text" id="ifscCode" formControlName="ifscCode" placeholder="e.g., SBIN0001234"
-              class="form-input" />
+            <input
+              type="text"
+              id="ifscCode"
+              formControlName="ifscCode"
+              placeholder="e.g., SBIN0001234"
+              class="form-input"
+            />
           </div>
 
           <div class="form-group">
             <label for="bankName">Bank Name <span class="required">*</span></label>
-            <input type="text" id="bankName" formControlName="bankName" placeholder="Enter bank name"
-              class="form-input" />
+            <input
+              type="text"
+              id="bankName"
+              formControlName="bankName"
+              placeholder="Enter bank name"
+              class="form-input"
+            />
           </div>
 
           <div class="form-group">
-            <label for="accountHolderName">Account Holder Name <span class="required">*</span></label>
-            <input type="text" id="accountHolderName" formControlName="accountHolderName"
-              placeholder="Enter account holder name" class="form-input" />
+            <label for="accountHolderName"
+              >Account Holder Name <span class="required">*</span></label
+            >
+            <input
+              type="text"
+              id="accountHolderName"
+              formControlName="accountHolderName"
+              placeholder="Enter account holder name"
+              class="form-input"
+            />
           </div>
 
           <div class="form-group">
             <label for="branchName">Branch Name</label>
-            <input type="text" id="branchName" formControlName="branchName" placeholder="Enter branch name (optional)"
-              class="form-input" />
+            <input
+              type="text"
+              id="branchName"
+              formControlName="branchName"
+              placeholder="Enter branch name (optional)"
+              class="form-input"
+            />
           </div>
         </form>
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" (click)="closeBankModal()">Cancel</button>
-        <button class="btn btn-primary" (click)="submitBankDetails()" [disabled]="isLoading || bankDetailsForm.invalid">
+        <button
+          class="btn btn-primary"
+          (click)="submitBankDetails()"
+          [disabled]="isLoading || bankDetailsForm.invalid"
+        >
           <span *ngIf="!isLoading">✓ Submit Details</span>
           <span *ngIf="isLoading" class="loading-spinner"></span>
         </button>
@@ -1013,21 +1247,33 @@
           <div class="form-row">
             <div class="form-group">
               <label for="vendorName">Vendor Name <span class="required">*</span></label>
-              <input type="text" id="vendorName" formControlName="name" placeholder="Enter vendor name"
-                class="form-input" [class.error]="vendorForm.get('name')?.invalid && vendorForm.get('name')?.touched" />
-              <span *ngIf="vendorForm.get('name')?.invalid && vendorForm.get('name')?.touched" class="error-text">
+              <input
+                type="text"
+                id="vendorName"
+                formControlName="name"
+                placeholder="Enter vendor name"
+                class="form-input"
+                [class.error]="vendorForm.get('name')?.invalid && vendorForm.get('name')?.touched"
+              />
+              <span
+                *ngIf="vendorForm.get('name')?.invalid && vendorForm.get('name')?.touched"
+                class="error-text"
+              >
                 ⚠️ Vendor name is required (2-100 characters)
               </span>
             </div>
 
-
             <div class="form-group">
               <label for="contactPerson">Contact Person</label>
-              <input type="text" id="contactPerson" formControlName="contactPerson"
-                placeholder="Enter contact person name" class="form-input" />
+              <input
+                type="text"
+                id="contactPerson"
+                formControlName="contactPerson"
+                placeholder="Enter contact person name"
+                class="form-input"
+              />
             </div>
             <div class="form-row">
-
               <!-- <div class="form-group">
     <label for="vendorType">Vendor Type <span class="required">*</span></label>
     <select
@@ -1065,20 +1311,39 @@
           <div class="form-row">
             <div class="form-group">
               <label for="vendorEmail">Email <span class="required">*</span></label>
-              <input type="email" id="vendorEmail" formControlName="email" placeholder="vendor@example.com"
+              <input
+                type="email"
+                id="vendorEmail"
+                formControlName="email"
+                placeholder="vendor@example.com"
                 class="form-input"
-                [class.error]="vendorForm.get('email')?.invalid && vendorForm.get('email')?.touched" />
-              <span *ngIf="vendorForm.get('email')?.invalid && vendorForm.get('email')?.touched" class="error-text">
+                [class.error]="vendorForm.get('email')?.invalid && vendorForm.get('email')?.touched"
+              />
+              <span
+                *ngIf="vendorForm.get('email')?.invalid && vendorForm.get('email')?.touched"
+                class="error-text"
+              >
                 ⚠️ Valid email is required
               </span>
             </div>
             <div class="form-group">
               <label for="vendorPhone">Phone Number <span class="required">*</span></label>
-              <input type="tel" id="vendorPhone" formControlName="phoneNumber" placeholder="10-digit phone number"
+              <input
+                type="tel"
+                id="vendorPhone"
+                formControlName="phoneNumber"
+                placeholder="10-digit phone number"
                 class="form-input"
-                [class.error]="vendorForm.get('phoneNumber')?.invalid && vendorForm.get('phoneNumber')?.touched" />
-              <span *ngIf="vendorForm.get('phoneNumber')?.invalid && vendorForm.get('phoneNumber')?.touched"
-                class="error-text">
+                [class.error]="
+                  vendorForm.get('phoneNumber')?.invalid && vendorForm.get('phoneNumber')?.touched
+                "
+              />
+              <span
+                *ngIf="
+                  vendorForm.get('phoneNumber')?.invalid && vendorForm.get('phoneNumber')?.touched
+                "
+                class="error-text"
+              >
                 ⚠️ Valid 10-digit phone number required
               </span>
             </div>
@@ -1086,10 +1351,20 @@
 
           <div class="form-group">
             <label for="vendorAddress">Address <span class="required">*</span></label>
-            <textarea id="vendorAddress" formControlName="address" placeholder="Enter complete address"
-              class="form-input" rows="3"
-              [class.error]="vendorForm.get('address')?.invalid && vendorForm.get('address')?.touched"></textarea>
-            <span *ngIf="vendorForm.get('address')?.invalid && vendorForm.get('address')?.touched" class="error-text">
+            <textarea
+              id="vendorAddress"
+              formControlName="address"
+              placeholder="Enter complete address"
+              class="form-input"
+              rows="3"
+              [class.error]="
+                vendorForm.get('address')?.invalid && vendorForm.get('address')?.touched
+              "
+            ></textarea>
+            <span
+              *ngIf="vendorForm.get('address')?.invalid && vendorForm.get('address')?.touched"
+              class="error-text"
+            >
               ⚠️ Address is required (10-500 characters)
             </span>
           </div>
@@ -1099,17 +1374,39 @@
           <div class="form-row">
             <div class="form-group">
               <label for="vendorBankName">Bank Name <span class="required">*</span></label>
-              <input type="text" id="vendorBankName" formControlName="bankName" placeholder="Enter bank name"
+              <input
+                type="text"
+                id="vendorBankName"
+                formControlName="bankName"
+                placeholder="Enter bank name"
                 class="form-input"
-                [class.error]="vendorForm.get('bankName')?.invalid && vendorForm.get('bankName')?.touched" />
+                [class.error]="
+                  vendorForm.get('bankName')?.invalid && vendorForm.get('bankName')?.touched
+                "
+              />
             </div>
             <div class="form-group">
-              <label for="vendorBankAccount">Bank Account Number <span class="required">*</span></label>
-              <input type="text" id="vendorBankAccount" formControlName="bankAccountNumber"
-                placeholder="12-digit account number" class="form-input"
-                [class.error]="vendorForm.get('bankAccountNumber')?.invalid && vendorForm.get('bankAccountNumber')?.touched" />
-              <span *ngIf="vendorForm.get('bankAccountNumber')?.invalid && vendorForm.get('bankAccountNumber')?.touched"
-                class="error-text">
+              <label for="vendorBankAccount"
+                >Bank Account Number <span class="required">*</span></label
+              >
+              <input
+                type="text"
+                id="vendorBankAccount"
+                formControlName="bankAccountNumber"
+                placeholder="12-digit account number"
+                class="form-input"
+                [class.error]="
+                  vendorForm.get('bankAccountNumber')?.invalid &&
+                  vendorForm.get('bankAccountNumber')?.touched
+                "
+              />
+              <span
+                *ngIf="
+                  vendorForm.get('bankAccountNumber')?.invalid &&
+                  vendorForm.get('bankAccountNumber')?.touched
+                "
+                class="error-text"
+              >
                 ⚠️ Valid 12-digit account number required
               </span>
             </div>
@@ -1117,10 +1414,20 @@
 
           <div class="form-group">
             <label for="vendorIfsc">IFSC Code <span class="required">*</span></label>
-            <input type="text" id="vendorIfsc" formControlName="ifscCode" placeholder="e.g., SBIN0001234"
+            <input
+              type="text"
+              id="vendorIfsc"
+              formControlName="ifscCode"
+              placeholder="e.g., SBIN0001234"
               class="form-input"
-              [class.error]="vendorForm.get('ifscCode')?.invalid && vendorForm.get('ifscCode')?.touched" />
-            <span *ngIf="vendorForm.get('ifscCode')?.invalid && vendorForm.get('ifscCode')?.touched" class="error-text">
+              [class.error]="
+                vendorForm.get('ifscCode')?.invalid && vendorForm.get('ifscCode')?.touched
+              "
+            />
+            <span
+              *ngIf="vendorForm.get('ifscCode')?.invalid && vendorForm.get('ifscCode')?.touched"
+              class="error-text"
+            >
               ⚠️ Valid IFSC code required (e.g., SBIN0001234)
             </span>
           </div>
@@ -1128,7 +1435,11 @@
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" (click)="closeVendorModal()">Cancel</button>
-        <button class="btn btn-primary" (click)="saveVendor()" [disabled]="isLoading || vendorForm.invalid">
+        <button
+          class="btn btn-primary"
+          (click)="saveVendor()"
+          [disabled]="isLoading || vendorForm.invalid"
+        >
           <span *ngIf="!isLoading">{{ selectedVendor ? '✓ Update' : '✓ Create' }} Vendor</span>
           <span *ngIf="isLoading" class="loading-spinner"></span>
         </button>
@@ -1151,7 +1462,9 @@
           </div>
           <div class="detail-row">
             <span class="detail-label">Name:</span>
-            <span class="detail-value"><strong>{{ selectedVendor.name }}</strong></span>
+            <span class="detail-value"
+              ><strong>{{ selectedVendor.name }}</strong></span
+            >
           </div>
           <div class="detail-row">
             <span class="detail-label">Contact Person:</span>
@@ -1201,37 +1514,73 @@
         <form [formGroup]="vendorPaymentForm">
           <div class="form-group">
             <label for="paymentVendor">Select Vendor <span class="required">*</span></label>
-            <select id="paymentVendor" formControlName="vendorId" class="form-input"
-              [class.error]="vendorPaymentForm.get('vendorId')?.invalid && vendorPaymentForm.get('vendorId')?.touched">
+            <select
+              id="paymentVendor"
+              formControlName="vendorId"
+              class="form-input"
+              [class.error]="
+                vendorPaymentForm.get('vendorId')?.invalid &&
+                vendorPaymentForm.get('vendorId')?.touched
+              "
+            >
               <option value="">Choose a vendor</option>
               <option *ngFor="let vendor of vendors" [value]="vendor.id">
                 {{ vendor.name }} - {{ vendor.email }}
               </option>
             </select>
-            <span *ngIf="vendorPaymentForm.get('vendorId')?.invalid && vendorPaymentForm.get('vendorId')?.touched"
-              class="error-text">
+            <span
+              *ngIf="
+                vendorPaymentForm.get('vendorId')?.invalid &&
+                vendorPaymentForm.get('vendorId')?.touched
+              "
+              class="error-text"
+            >
               ⚠️ Please select a vendor
             </span>
           </div>
 
           <div class="form-group">
             <label for="paymentAmount">Amount (₹) <span class="required">*</span></label>
-            <input type="number" id="paymentAmount" formControlName="amount" placeholder="Enter amount"
+            <input
+              type="number"
+              id="paymentAmount"
+              formControlName="amount"
+              placeholder="Enter amount"
               class="form-input"
-              [class.error]="vendorPaymentForm.get('amount')?.invalid && vendorPaymentForm.get('amount')?.touched" />
-            <span *ngIf="vendorPaymentForm.get('amount')?.invalid && vendorPaymentForm.get('amount')?.touched"
-              class="error-text">
+              [class.error]="
+                vendorPaymentForm.get('amount')?.invalid && vendorPaymentForm.get('amount')?.touched
+              "
+            />
+            <span
+              *ngIf="
+                vendorPaymentForm.get('amount')?.invalid && vendorPaymentForm.get('amount')?.touched
+              "
+              class="error-text"
+            >
               ⚠️ Valid amount is required (minimum ₹1)
             </span>
           </div>
 
           <div class="form-group">
             <label for="paymentDescription">Description <span class="required">*</span></label>
-            <textarea id="paymentDescription" formControlName="description" placeholder="Enter payment description"
-              class="form-input" rows="4"
-              [class.error]="vendorPaymentForm.get('description')?.invalid && vendorPaymentForm.get('description')?.touched"></textarea>
-            <span *ngIf="vendorPaymentForm.get('description')?.invalid && vendorPaymentForm.get('description')?.touched"
-              class="error-text">
+            <textarea
+              id="paymentDescription"
+              formControlName="description"
+              placeholder="Enter payment description"
+              class="form-input"
+              rows="4"
+              [class.error]="
+                vendorPaymentForm.get('description')?.invalid &&
+                vendorPaymentForm.get('description')?.touched
+              "
+            ></textarea>
+            <span
+              *ngIf="
+                vendorPaymentForm.get('description')?.invalid &&
+                vendorPaymentForm.get('description')?.touched
+              "
+              class="error-text"
+            >
               ⚠️ Description is required (minimum 10 characters)
             </span>
           </div>
@@ -1241,8 +1590,11 @@
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" (click)="closeVendorPaymentModal()">Cancel</button>
-        <button class="btn btn-success" (click)="createVendorPaymentRequest()"
-          [disabled]="isLoading || vendorPaymentForm.invalid">
+        <button
+          class="btn btn-success"
+          (click)="createVendorPaymentRequest()"
+          [disabled]="isLoading || vendorPaymentForm.invalid"
+        >
           <span *ngIf="!isLoading">✓ Create Request</span>
           <span *ngIf="isLoading" class="loading-spinner"></span>
         </button>
@@ -1275,28 +1627,36 @@
 
           <!-- Detailed Breakdown (if available) -->
           <div *ngIf="hasDetailedBreakdown()">
-            <hr style="margin: 15px 0; border: 1px solid #e2e8f0;">
-            <h4 style="margin: 15px 0 10px 0; color: #475569; font-size: 0.95rem;">Salary Breakdown</h4>
+            <hr style="margin: 15px 0; border: 1px solid #e2e8f0" />
+            <h4 style="margin: 15px 0 10px 0; color: #475569; font-size: 0.95rem">
+              Salary Breakdown
+            </h4>
 
             <div class="detail-row" *ngIf="selectedSalaryTemplate.basicSalary">
               <span class="detail-label">Basic Salary:</span>
-              <span class="detail-value">₹{{ selectedSalaryTemplate.basicSalary | number:'1.2-2' }}</span>
+              <span class="detail-value"
+                >₹{{ selectedSalaryTemplate.basicSalary | number : '1.2-2' }}</span
+              >
             </div>
             <div class="detail-row" *ngIf="selectedSalaryTemplate.hra">
               <span class="detail-label">HRA:</span>
-              <span class="detail-value">₹{{ selectedSalaryTemplate.hra | number:'1.2-2' }}</span>
+              <span class="detail-value">₹{{ selectedSalaryTemplate.hra | number : '1.2-2' }}</span>
             </div>
             <div class="detail-row" *ngIf="selectedSalaryTemplate.da">
               <span class="detail-label">DA:</span>
-              <span class="detail-value">₹{{ selectedSalaryTemplate.da | number:'1.2-2' }}</span>
+              <span class="detail-value">₹{{ selectedSalaryTemplate.da | number : '1.2-2' }}</span>
             </div>
             <div class="detail-row" *ngIf="selectedSalaryTemplate.pf">
               <span class="detail-label">PF Deduction:</span>
-              <span class="detail-value text-danger">-₹{{ selectedSalaryTemplate.pf | number:'1.2-2' }}</span>
+              <span class="detail-value text-danger"
+                >-₹{{ selectedSalaryTemplate.pf | number : '1.2-2' }}</span
+              >
             </div>
             <div class="detail-row" *ngIf="selectedSalaryTemplate.otherAllowances">
               <span class="detail-label">Other Allowances:</span>
-              <span class="detail-value">₹{{ selectedSalaryTemplate.otherAllowances | number:'1.2-2' }}</span>
+              <span class="detail-value"
+                >₹{{ selectedSalaryTemplate.otherAllowances | number : '1.2-2' }}</span
+              >
             </div>
           </div>
 
@@ -1307,15 +1667,18 @@
           </div>
 
           <!-- Summary (always shown) -->
-          <hr style="margin: 15px 0; border: 1px solid #e2e8f0;">
+          <hr style="margin: 15px 0; border: 1px solid #e2e8f0" />
           <div class="detail-row highlight">
             <span class="detail-label"><strong>Gross Salary:</strong></span>
-            <span class="detail-value"><strong>₹{{ selectedSalaryTemplate.grossSalary | number:'1.2-2'
-                }}</strong></span>
+            <span class="detail-value"
+              ><strong>₹{{ selectedSalaryTemplate.grossSalary | number : '1.2-2' }}</strong></span
+            >
           </div>
           <div class="detail-row highlight success">
             <span class="detail-label"><strong>Net Salary:</strong></span>
-            <span class="detail-value"><strong>₹{{ selectedSalaryTemplate.netSalary | number:'1.2-2' }}</strong></span>
+            <span class="detail-value"
+              ><strong>₹{{ selectedSalaryTemplate.netSalary | number : '1.2-2' }}</strong></span
+            >
           </div>
         </div>
       </div>
@@ -1337,7 +1700,6 @@
       </div>
 
       <div class="modal-body employee-detail-body" *ngIf="selectedEmployee">
-
         <!-- Personal Information Section -->
         <div class="detail-section">
           <div class="section-header-detail">
@@ -1356,7 +1718,7 @@
               <span class="detail-label">FULL NAME</span>
               <span class="detail-value">{{ selectedEmployee.name || 'N/A' }}</span>
             </div>
-          <!-- <div class="detail-item">
+            <!-- <div class="detail-item">
               <span class="detail-label">EMAIL</span>
               <span class="detail-value">{{ selectedEmployee.email || 'N/A' }}</span>
             </div>
@@ -1381,7 +1743,7 @@
             <div class="detail-item">
               <span class="detail-label">USERNAME</span>
               <span class="detail-value">{{ selectedEmployee.username || 'N/A' }}</span>
-            </div>  --> 
+            </div>  -->
           </div>
         </div>
 
@@ -1402,7 +1764,10 @@
             </div>
           </div>
 
-          <div class="documents-list" *ngIf="selectedEmployee.documents && selectedEmployee.documents.length > 0">
+          <div
+            class="documents-list"
+            *ngIf="selectedEmployee.documents && selectedEmployee.documents.length > 0"
+          >
             <div class="document-card" *ngFor="let doc of selectedEmployee.documents">
               <div class="doc-info">
                 <div class="doc-header">
@@ -1413,7 +1778,7 @@
                 </div>
                 <div class="doc-meta">
                   <span class="doc-type">📎 {{ doc.type }}</span>
-                  <span class="doc-date">📅 {{ doc.uploadedAt | date:'medium' }}</span>
+                  <span class="doc-date">📅 {{ doc.uploadedAt | date : 'medium' }}</span>
                 </div>
                 <div class="doc-rejection" *ngIf="doc.rejectionReason">
                   <strong>Rejection Reason:</strong> {{ doc.rejectionReason }}
@@ -1425,21 +1790,32 @@
                 </a>
 
                 <!-- ✅ Pass true (boolean, no quotes) for approve -->
-                <button class="btn btn-sm btn-success" (click)="verifyDocument(doc.documentId, true)"
-                  *ngIf="doc.status !== 'APPROVED'" [disabled]="isLoading">
+                <button
+                  class="btn btn-sm btn-success"
+                  (click)="verifyDocument(doc.documentId, true)"
+                  *ngIf="doc.status !== 'APPROVED'"
+                  [disabled]="isLoading"
+                >
                   ✓ Approve
                 </button>
 
                 <!-- ✅ Pass false (boolean, no quotes) for reject -->
-                <button class="btn btn-sm btn-danger" (click)="verifyDocument(doc.documentId, false)"
-                  *ngIf="doc.status !== 'REJECTED'" [disabled]="isLoading">
+                <button
+                  class="btn btn-sm btn-danger"
+                  (click)="verifyDocument(doc.documentId, false)"
+                  *ngIf="doc.status !== 'REJECTED'"
+                  [disabled]="isLoading"
+                >
                   ✗ Reject
                 </button>
               </div>
             </div>
           </div>
 
-          <div class="no-data" *ngIf="!selectedEmployee.documents || selectedEmployee.documents.length === 0">
+          <div
+            class="no-data"
+            *ngIf="!selectedEmployee.documents || selectedEmployee.documents.length === 0"
+          >
             <div class="no-data-icon">📄</div>
             <p>No documents uploaded</p>
           </div>
@@ -1449,7 +1825,10 @@
         <div class="detail-section" *ngIf="selectedEmployee.bankDetails">
           <div class="section-header-detail">
             <h4>🏦 Bank Details</h4>
-            <span class="status-badge" [ngClass]="selectedEmployee.bankDetails.status?.toLowerCase()">
+            <span
+              class="status-badge"
+              [ngClass]="selectedEmployee.bankDetails.status?.toLowerCase()"
+            >
               {{ selectedEmployee.bankDetails.status }}
             </span>
           </div>
@@ -1457,11 +1836,15 @@
           <div class="detail-grid">
             <div class="detail-item">
               <span class="detail-label">ACCOUNT HOLDER NAME</span>
-              <span class="detail-value">{{ selectedEmployee.bankDetails.accountHolderName || 'N/A' }}</span>
+              <span class="detail-value">{{
+                selectedEmployee.bankDetails.accountHolderName || 'N/A'
+              }}</span>
             </div>
             <div class="detail-item">
               <span class="detail-label">ACCOUNT NUMBER</span>
-              <span class="detail-value">{{ selectedEmployee.bankDetails.accountNumberMasked || 'N/A' }}</span>
+              <span class="detail-value">{{
+                selectedEmployee.bankDetails.accountNumberMasked || 'N/A'
+              }}</span>
             </div>
             <div class="detail-item">
               <span class="detail-label">BANK NAME</span>
@@ -1473,11 +1856,16 @@
             </div>
             <div class="detail-item">
               <span class="detail-label">BRANCH NAME</span>
-              <span class="detail-value">{{ selectedEmployee.bankDetails.branchName || 'N/A' }}</span>
+              <span class="detail-value">{{
+                selectedEmployee.bankDetails.branchName || 'N/A'
+              }}</span>
             </div>
             <div class="detail-item">
               <span class="detail-label">STATUS</span>
-              <span class="status-badge" [ngClass]="selectedEmployee.bankDetails.status?.toLowerCase()">
+              <span
+                class="status-badge"
+                [ngClass]="selectedEmployee.bankDetails.status?.toLowerCase()"
+              >
                 {{ selectedEmployee.bankDetails.status }}
               </span>
             </div>
@@ -1488,16 +1876,27 @@
           </div>
 
           <!-- BANK DETAILS ACTION BUTTONS -->
-          <div class="bank-actions"
-            *ngIf="selectedEmployee.bankDetails && selectedEmployee.bankDetails.status !== 'APPROVED'">
-
+          <div
+            class="bank-actions"
+            *ngIf="
+              selectedEmployee.bankDetails && selectedEmployee.bankDetails.status !== 'APPROVED'
+            "
+          >
             <!-- ✅ Pass true (boolean, no quotes) for approve -->
-            <button class="btn btn-success" (click)="verifyBankDetails(true)" [disabled]="isLoading">
+            <button
+              class="btn btn-success"
+              (click)="verifyBankDetails(true)"
+              [disabled]="isLoading"
+            >
               ✓ Approve Bank Details
             </button>
 
             <!-- ✅ Pass false (boolean, no quotes) for reject -->
-            <button class="btn btn-danger" (click)="verifyBankDetails(false)" [disabled]="isLoading">
+            <button
+              class="btn btn-danger"
+              (click)="verifyBankDetails(false)"
+              [disabled]="isLoading"
+            >
               ✗ Reject Bank Details
             </button>
           </div>
@@ -1516,7 +1915,9 @@
 
           <div class="action-warning" *ngIf="!canActivateEmployee()">
             <span class="warning-icon">⚠️</span>
-            <span>Please verify all documents and bank details before activating the employee.</span>
+            <span
+              >Please verify all documents and bank details before activating the employee.</span
+            >
           </div>
 
           <div class="action-success" *ngIf="canActivateEmployee()">
@@ -1524,8 +1925,11 @@
             <span>All verifications complete. Ready to activate employee.</span>
           </div>
 
-          <button class="btn btn-primary btn-lg btn-block" (click)="approveEmployee()"
-            [disabled]="!canActivateEmployee() || isLoading">
+          <button
+            class="btn btn-primary btn-lg btn-block"
+            (click)="approveEmployee()"
+            [disabled]="!canActivateEmployee() || isLoading"
+          >
             <span *ngIf="!isLoading">✓ Approve Employee & Activate</span>
             <span *ngIf="isLoading" class="loading-spinner"></span>
           </button>
@@ -1539,7 +1943,6 @@
             <p>This employee has been successfully onboarded and activated.</p>
           </div>
         </div>
-
       </div>
 
       <div class="modal-footer">
@@ -1551,139 +1954,148 @@
 
   <!--Concern view start -->
   <!-- Concern Detail Modal -->
-<div class="modal-overlay" *ngIf="showConcernModal" (click)="closeConcernModal()">
-  <div class="modal modal-large" (click)="$event.stopPropagation()">
-    <div class="modal-header">
-      <h3>🎫 Support Ticket Details</h3>
-      <button class="modal-close" (click)="closeConcernModal()">×</button>
-    </div>
-    
-    <div class="modal-body" *ngIf="selectedConcern">
-      
-      <!-- Ticket Information -->
-      <div class="verification-section">
-        <div class="section-header-inline">
-          <h4>📋 Ticket Information</h4>
-          <span class="verification-badge" [ngClass]="selectedConcern.status?.toLowerCase()">
-            {{ selectedConcern.status }}
-          </span>
-        </div>
-        <div class="info-grid">
-          <div class="info-item">
-            <span class="info-label">Ticket Number</span>
-            <span class="info-value"><strong>{{ selectedConcern.ticketNumber }}</strong></span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">Employee Name</span>
-            <span class="info-value">{{ selectedConcern.employeeName }}</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">Category</span>
-            <span class="info-value">{{ selectedConcern.category }}</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">Priority</span>
-            <span class="badge" [ngClass]="selectedConcern.priority?.toLowerCase()">
-              {{ selectedConcern.priority }}
+  <div class="modal-overlay" *ngIf="showConcernModal" (click)="closeConcernModal()">
+    <div class="modal modal-large" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>🎫 Support Ticket Details</h3>
+        <button class="modal-close" (click)="closeConcernModal()">×</button>
+      </div>
+
+      <div class="modal-body" *ngIf="selectedConcern">
+        <!-- Ticket Information -->
+        <div class="verification-section">
+          <div class="section-header-inline">
+            <h4>📋 Ticket Information</h4>
+            <span class="verification-badge" [ngClass]="selectedConcern.status?.toLowerCase()">
+              {{ selectedConcern.status }}
             </span>
           </div>
-          <div class="info-item">
-            <span class="info-label">Created At</span>
-            <span class="info-value">{{ selectedConcern.createdAt | date:'medium' }}</span>
-          </div>
-          <div class="info-item" *ngIf="selectedConcern.updatedAt">
-            <span class="info-label">Last Updated</span>
-            <span class="info-value">{{ selectedConcern.updatedAt | date:'medium' }}</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Employee Description -->
-      <div class="verification-section">
-        <div class="section-header-inline">
-          <h4>💬 Employee's Concern</h4>
-        </div>
-        <div class="concern-description">
-          <p>{{ selectedConcern.description }}</p>
-        </div>
-        <div class="attachment-section" *ngIf="selectedConcern.attachmentUrl">
-          <button class="btn btn-sm btn-secondary" (click)="viewDocument(selectedConcern.attachmentUrl)">
-            📎 View Attachment
-          </button>
-        </div>
-      </div>
-
-      <!-- Admin Response (if exists) -->
-      <div class="verification-section" *ngIf="selectedConcern.adminResponse">
-        <div class="section-header-inline">
-          <h4>✉️ Admin Response</h4>
-        </div>
-        <div class="admin-response">
-          <p>{{ selectedConcern.adminResponse }}</p>
-        </div>
-      </div>
-
-      <!-- Response Form (if concern is open/in-progress) -->
-      <div class="verification-section response-section" *ngIf="canRespondToConcern()">
-        <div class="section-header-inline">
-          <h4>📝 Respond to Concern</h4>
-        </div>
-        <div class="form-group">
-          <label for="concernResponse">Your Response <span class="required">*</span></label>
-          <textarea
-            id="concernResponse"
-            [(ngModel)]="concernResponseText"
-            placeholder="Enter your response to the employee..."
-            class="form-input"
-            rows="5"
-          ></textarea>
-          <small class="form-hint">This response will be sent to the employee via email.</small>
-        </div>
-      </div>
-
-      <!-- Action Buttons -->
-      <div class="verification-section action-section" *ngIf="canResolveOrReject()">
-        <div class="action-button-group">
-          <button 
-            class="btn btn-primary btn-lg"
-            (click)="respondToConcern()"
-            [disabled]="!concernResponseText || isLoading">
-            <span *ngIf="!isLoading">💬 Send Response</span>
-            <span *ngIf="isLoading">Sending...</span>
-          </button>
-          <button 
-            class="btn btn-success btn-lg"
-            (click)="resolveConcern()"
-            [disabled]="!concernResponseText || isLoading">
-            <span *ngIf="!isLoading">✅ Resolve & Close</span>
-            <span *ngIf="isLoading">Resolving...</span>
-          </button>
-          <button 
-            class="btn btn-danger btn-lg"
-            (click)="rejectConcern()"
-            [disabled]="!concernResponseText || isLoading">
-            <span *ngIf="!isLoading">❌ Reject Concern</span>
-            <span *ngIf="isLoading">Rejecting...</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Closed Message -->
-      <div class="verification-section" *ngIf="!canResolveOrReject()">
-        <div class="completion-status">
-          <div class="status-message info">
-            <span class="info-icon">ℹ️</span>
-            <p>This concern has been <strong>{{ selectedConcern.status }}</strong> and cannot be modified further.</p>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">Ticket Number</span>
+              <span class="info-value"
+                ><strong>{{ selectedConcern.ticketNumber }}</strong></span
+              >
+            </div>
+            <div class="info-item">
+              <span class="info-label">Employee Name</span>
+              <span class="info-value">{{ selectedConcern.employeeName }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Category</span>
+              <span class="info-value">{{ selectedConcern.category }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Priority</span>
+              <span class="badge" [ngClass]="selectedConcern.priority?.toLowerCase()">
+                {{ selectedConcern.priority }}
+              </span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Created At</span>
+              <span class="info-value">{{ selectedConcern.createdAt | date : 'medium' }}</span>
+            </div>
+            <div class="info-item" *ngIf="selectedConcern.updatedAt">
+              <span class="info-label">Last Updated</span>
+              <span class="info-value">{{ selectedConcern.updatedAt | date : 'medium' }}</span>
+            </div>
           </div>
         </div>
+
+        <!-- Employee Description -->
+        <div class="verification-section">
+          <div class="section-header-inline">
+            <h4>💬 Employee's Concern</h4>
+          </div>
+          <div class="concern-description">
+            <p>{{ selectedConcern.description }}</p>
+          </div>
+          <div class="attachment-section" *ngIf="selectedConcern.attachmentUrl">
+            <button
+              class="btn btn-sm btn-secondary"
+              (click)="viewDocument(selectedConcern.attachmentUrl)"
+            >
+              📎 View Attachment
+            </button>
+          </div>
+        </div>
+
+        <!-- Admin Response (if exists) -->
+        <div class="verification-section" *ngIf="selectedConcern.adminResponse">
+          <div class="section-header-inline">
+            <h4>✉️ Admin Response</h4>
+          </div>
+          <div class="admin-response">
+            <p>{{ selectedConcern.adminResponse }}</p>
+          </div>
+        </div>
+
+        <!-- Response Form (if concern is open/in-progress) -->
+        <div class="verification-section response-section" *ngIf="canRespondToConcern()">
+          <div class="section-header-inline">
+            <h4>📝 Respond to Concern</h4>
+          </div>
+          <div class="form-group">
+            <label for="concernResponse">Your Response <span class="required">*</span></label>
+            <textarea
+              id="concernResponse"
+              [(ngModel)]="concernResponseText"
+              placeholder="Enter your response to the employee..."
+              class="form-input"
+              rows="5"
+            ></textarea>
+            <small class="form-hint">This response will be sent to the employee via email.</small>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="verification-section action-section" *ngIf="canResolveOrReject()">
+          <div class="action-button-group">
+            <button
+              class="btn btn-primary btn-lg"
+              (click)="respondToConcern()"
+              [disabled]="!concernResponseText || isLoading"
+            >
+              <span *ngIf="!isLoading">💬 Send Response</span>
+              <span *ngIf="isLoading">Sending...</span>
+            </button>
+            <button
+              class="btn btn-success btn-lg"
+              (click)="resolveConcern()"
+              [disabled]="!concernResponseText || isLoading"
+            >
+              <span *ngIf="!isLoading">✅ Resolve & Close</span>
+              <span *ngIf="isLoading">Resolving...</span>
+            </button>
+            <button
+              class="btn btn-danger btn-lg"
+              (click)="rejectConcern()"
+              [disabled]="!concernResponseText || isLoading"
+            >
+              <span *ngIf="!isLoading">❌ Reject Concern</span>
+              <span *ngIf="isLoading">Rejecting...</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Closed Message -->
+        <div class="verification-section" *ngIf="!canResolveOrReject()">
+          <div class="completion-status">
+            <div class="status-message info">
+              <span class="info-icon">ℹ️</span>
+              <p>
+                This concern has been <strong>{{ selectedConcern.status }}</strong> and cannot be
+                modified further.
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
 
-    </div>
-
-    <div class="modal-footer">
-      <button class="btn btn-secondary" (click)="closeConcernModal()">Close</button>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeConcernModal()">Close</button>
+      </div>
     </div>
   </div>
-</div>
   <!-- Concern Detail Modal view end-->
 </div>

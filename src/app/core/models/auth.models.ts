@@ -4,19 +4,18 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
-  token: string;
+  token?: string; // optional because it's not present for first-time login
   userId: number;
   email: string;
-  roles: string[]; // Set<String> in Java becomes string[] in TypeScript
-  orgStatus: 'PENDING' | 'VERIFIED'; // Union type for specific values
-  message?: string; // Optional since it might not always be present
+  roles: string[];
+  orgStatus?: 'PENDING' | 'VERIFIED'; // optional because it may not be sent for employees
+  message?: string;
+  status?: 'SUCCESS' | 'FIRST_TIME_LOGIN' | 'ERROR'; 
 }
 
-// Optional: User info interface for storing in service
 export interface UserInfo {
   userId: number;
   email: string;
   roles: string[];
-  orgStatus: 'PENDING' | 'VERIFIED';
-  
+  orgStatus?: 'PENDING' | 'VERIFIED';
 }

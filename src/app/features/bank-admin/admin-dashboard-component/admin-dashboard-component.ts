@@ -1,4 +1,3 @@
-// admin-dashboard.component.ts
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -11,8 +10,7 @@ import { BankAdminService } from '../../../core/services/bank-admin-service';
 import { 
   BankAdminOrgRegisterResponse, 
   PaymentRequestList,
-  PaymentRequestDetail,
-  PaymentRequestPageResponse
+  PaymentRequestDetail
 } from '../../../core/models/response-model.models';
 import { PaymentRequestFilter } from '../../../core/models/request-model.models';
 
@@ -74,7 +72,6 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     private bankAdminService: BankAdminService,
     private router: Router,
     private cdr: ChangeDetectorRef
-
   ) {}
 
   ngOnInit(): void {
@@ -112,6 +109,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     } else if (tab === 'payment') {
       this.resetPaymentFilters();
     }
+    this.cdr.detectChanges();
   }
 
   private loadDashboardData(): void {
@@ -126,12 +124,11 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
         takeUntil(this.destroy$),
         finalize(() => {
           this.loading = false;
-          console.log('Organizations loaded');
+          this.cdr.detectChanges();
         })
       )
       .subscribe({
         next: (data) => {
-          console.log('Organizations received:', data);
           this.allOrganizations = data || [];
           this.calculateStats();
           this.applyOrgFilter();
@@ -143,6 +140,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
           this.calculateStats();
           this.applyOrgFilter();
           this.showAlert('Failed to load organizations: ' + (err?.error?.message || err?.message || 'Unknown error'));
+          this.cdr.detectChanges();
         }
       });
   }
@@ -161,6 +159,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     } else {
       this.filteredOrganizations = this.allOrganizations.filter(org => org.status === this.orgFilter);
     }
+    this.cdr.detectChanges();
   }
 
   changeOrgFilter(filter: string): void {
@@ -171,52 +170,28 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   selectOrganization(org: BankAdminOrgRegisterResponse): void {
     this.selectedOrganization = org;
     this.currentOrgId = org.orgId;
+    this.cdr.detectChanges();
   }
 
-  // Check if organization has bank details
   hasBankDetails(org: BankAdminOrgRegisterResponse | null): boolean {
     if (!org) return false;
-    // Check if bankDetailsProvided flag is true, or if individual bank fields are populated
     const hasBankFlag = (org as any).bankDetailsProvided === true;
     const hasIndividualFields = !!(org.accountHolderName && org.accountNumber && org.ifscCode && org.bankName);
     return hasBankFlag || hasIndividualFields;
   }
 
-  // Mask account number for security
   maskAccountNumber(accountNumber: string | undefined | null): string {
-    if (!accountNumber || accountNumber.length <= 4) {
-      return accountNumber || '';
-    }
+    if (!accountNumber || accountNumber.length <= 4) return accountNumber || '';
     const lastFour = accountNumber.slice(-4);
     const maskedPortion = '*'.repeat(accountNumber.length - 4);
     return `${maskedPortion}${lastFour}`;
   }
 
-  // Check if all documents are approved
-  //areAllDocumentsApproved(org: BankAdminOrgRegisterResponse | null): boolean {
-    //if (!org || !org.documents || org.documents.length === 0) return false;
-    //return org.documents.every(doc => doc.status === 'APPROVED');
-  //}
-
-  // Check if all documents are approved
-areAllDocumentsApproved(org: BankAdminOrgRegisterResponse | null): boolean {
-  if (!org || !org.documents || org.documents.length === 0) {
-    return false;
+  areAllDocumentsApproved(org: BankAdminOrgRegisterResponse | null): boolean {
+    if (!org || !org.documents || org.documents.length === 0) return false;
+    return org.documents.every(doc => doc.status === 'APPROVED');
   }
-  
-  // Required document types
-  const requiredDocs = ['PAN', 'GST', 'LICENSE'];
-  
-  // Get approved document types (convert to uppercase for case-insensitive comparison)
-  const approvedDocTypes = org.documents
-    .filter(doc => doc.status === 'APPROVED')
-    .map(doc => doc.fileType.toUpperCase());
-  
-  // Check if all 3 required documents are approved
-  return requiredDocs.every(reqDoc => approvedDocTypes.includes(reqDoc));
-}
 
-  // Check if organization can be verified (documents + bank approved)
   canVerifyOrganization(org: BankAdminOrgRegisterResponse | null): boolean {
     if (!org) return false;
     const docsApproved = this.areAllDocumentsApproved(org);
@@ -226,24 +201,30 @@ areAllDocumentsApproved(org: BankAdminOrgRegisterResponse | null): boolean {
 
   verifyOrganization(orgId: number): void {
     if (!confirm('Are you sure you want to verify and activate this organization?')) return;
-    
+
     this.processingAction = true;
+    this.cdr.detectChanges();
 
     this.bankAdminService.verifyOrganization(orgId)
       .pipe(
         takeUntil(this.destroy$),
-        finalize(() => this.processingAction = false)
+        finalize(() => {
+          this.processingAction = false;
+          this.cdr.detectChanges();
+        })
       )
       .subscribe({
-        next: (res) => {
+        next: () => {
+          const org = this.allOrganizations.find(o => o.orgId === orgId);
+          if (org) org.status = 'ACTIVE'; // instant UI update
           this.showAlert('✅ Organization verified successfully!');
           this.fetchAllOrganizations();
-          this.selectedOrganization = null;
           this.cdr.detectChanges();
         },
         error: (err) => {
           console.error(err);
           this.showAlert('❌ Failed to verify organization: ' + (err?.error?.message || 'Unknown error'));
+          this.cdr.detectChanges();
         }
       });
   }
@@ -251,23 +232,30 @@ areAllDocumentsApproved(org: BankAdminOrgRegisterResponse | null): boolean {
   verifyDocument(docId: number): void {
     if (!confirm('Are you sure you want to approve this document?')) return;
     if (!this.selectedOrganization) return;
-    
+
+    const doc = this.selectedOrganization.documents.find(d => d.docId === docId);
+    if (doc) doc.status = 'APPROVED'; // instant feedback
     this.processingAction = true;
+    this.cdr.detectChanges();
 
     this.bankAdminService.verifyDocument(this.selectedOrganization.orgId, docId)
       .pipe(
         takeUntil(this.destroy$),
-        finalize(() => this.processingAction = false)
+        finalize(() => {
+          this.processingAction = false;
+          this.cdr.detectChanges();
+        })
       )
       .subscribe({
         next: () => {
           this.showAlert('✅ Document approved successfully!');
-          this.fetchAllOrganizations();
           this.cdr.detectChanges();
         },
         error: (err) => {
           console.error(err);
+          if (doc) doc.status = 'PENDING'; // revert if error
           this.showAlert('❌ Failed to approve document: ' + (err?.error?.message || 'Unknown error'));
+          this.cdr.detectChanges();
         }
       });
   }
@@ -275,23 +263,30 @@ areAllDocumentsApproved(org: BankAdminOrgRegisterResponse | null): boolean {
   verifyBankDetails(): void {
     if (!confirm('Are you sure you want to approve bank details?')) return;
     if (!this.selectedOrganization) return;
-    
+
+    const prevStatus = this.selectedOrganization.bankVerificationStatus;
+    this.selectedOrganization.bankVerificationStatus = 'APPROVED'; // instant feedback
     this.processingAction = true;
+    this.cdr.detectChanges();
 
     this.bankAdminService.verifyBankDetails(this.selectedOrganization.orgId)
       .pipe(
         takeUntil(this.destroy$),
-        finalize(() => this.processingAction = false)
+        finalize(() => {
+          this.processingAction = false;
+          this.cdr.detectChanges();
+        })
       )
       .subscribe({
         next: () => {
           this.showAlert('✅ Bank details approved successfully!');
-          this.fetchAllOrganizations();
           this.cdr.detectChanges();
         },
         error: (err) => {
           console.error(err);
+          this.selectedOrganization!.bankVerificationStatus = prevStatus; // rollback
           this.showAlert('❌ Failed to approve bank details: ' + (err?.error?.message || 'Unknown error'));
+          this.cdr.detectChanges();
         }
       });
   }
@@ -308,7 +303,7 @@ areAllDocumentsApproved(org: BankAdminOrgRegisterResponse | null): boolean {
     this.bankAdminService.getFilteredPaymentRequests(this.paymentFilters)
       .pipe(
         takeUntil(this.destroy$),
-        finalize(() => console.log('Payment requests loaded'))
+        finalize(() => this.cdr.detectChanges())
       )
       .subscribe({
         next: (res) => {
@@ -322,6 +317,7 @@ areAllDocumentsApproved(org: BankAdminOrgRegisterResponse | null): boolean {
           this.paymentRequests = [];
           this.totalPages = 0;
           this.totalPaymentRequests = 0;
+          this.cdr.detectChanges();
         }
       });
   }
@@ -337,19 +333,27 @@ areAllDocumentsApproved(org: BankAdminOrgRegisterResponse | null): boolean {
         error: (err) => {
           console.error(err);
           this.showAlert('Failed to load payment details: ' + (err?.error?.message || 'Unknown error'));
+          this.cdr.detectChanges();
         }
       });
   }
 
   approvePayment(paymentId: number): void {
     if (!confirm('Are you sure you want to approve this payment request?')) return;
-    
+
+    const payment = this.paymentRequests.find(p => p.paymentId === paymentId);
+    if (payment) payment.status = 'APPROVED'; // instant UI update
+
     this.processingAction = true;
+    this.cdr.detectChanges();
 
     this.bankAdminService.approvePaymentRequest(paymentId)
       .pipe(
         takeUntil(this.destroy$),
-        finalize(() => this.processingAction = false)
+        finalize(() => {
+          this.processingAction = false;
+          this.cdr.detectChanges();
+        })
       )
       .subscribe({
         next: () => {
@@ -360,20 +364,29 @@ areAllDocumentsApproved(org: BankAdminOrgRegisterResponse | null): boolean {
         },
         error: (err) => {
           console.error(err);
+          if (payment) payment.status = 'PENDING'; // rollback
           this.showAlert('❌ Failed to approve payment: ' + (err?.error?.message || 'Unknown error'));
+          this.cdr.detectChanges();
         }
       });
   }
 
   disbursePayment(paymentId: number): void {
     if (!confirm('Are you sure you want to disburse this payment?')) return;
-    
+
+    const payment = this.paymentRequests.find(p => p.paymentId === paymentId);
+    if (payment) payment.status = 'DISBURSED'; // instant UI update
+
     this.processingAction = true;
+    this.cdr.detectChanges();
 
     this.bankAdminService.disbursePayment(paymentId)
       .pipe(
         takeUntil(this.destroy$),
-        finalize(() => this.processingAction = false)
+        finalize(() => {
+          this.processingAction = false;
+          this.cdr.detectChanges();
+        })
       )
       .subscribe({
         next: () => {
@@ -384,7 +397,9 @@ areAllDocumentsApproved(org: BankAdminOrgRegisterResponse | null): boolean {
         },
         error: (err) => {
           console.error(err);
+          if (payment) payment.status = 'APPROVED'; // rollback
           this.showAlert('❌ Failed to disburse payment: ' + (err?.error?.message || 'Unknown error'));
+          this.cdr.detectChanges();
         }
       });
   }
@@ -428,11 +443,13 @@ areAllDocumentsApproved(org: BankAdminOrgRegisterResponse | null): boolean {
     this.rejectTargetDocId = docId;
     this.rejectReason = '';
     this.showRejectModal = true;
+    this.cdr.detectChanges();
   }
 
   closeRejectModal(): void {
     this.showRejectModal = false;
     this.rejectReason = '';
+    this.cdr.detectChanges();
   }
 
   submitReject(): void {
@@ -446,24 +463,30 @@ areAllDocumentsApproved(org: BankAdminOrgRegisterResponse | null): boolean {
     }
 
     this.processingAction = true;
-    const handler = this.getRejectHandler();
+    this.cdr.detectChanges();
 
+    const handler = this.getRejectHandler();
     if (handler) {
       handler.pipe(
         takeUntil(this.destroy$),
-        finalize(() => this.processingAction = false)
+        finalize(() => {
+          this.processingAction = false;
+          this.cdr.detectChanges();
+        })
       )
-        .subscribe({
-          next: () => {
-            this.showAlert('✅ Rejected successfully!');
-            this.closeRejectModal();
-            this.refreshAfterAction();
-          },
-          error: (err: any) => {
-            console.error(err);
-            this.showAlert('❌ Failed to reject: ' + (err?.error?.message || 'Unknown error'));
-          }
-        });
+      .subscribe({
+        next: () => {
+          this.showAlert('✅ Rejected successfully!');
+          this.closeRejectModal();
+          this.refreshAfterAction();
+          this.cdr.detectChanges();
+        },
+        error: (err: any) => {
+          console.error(err);
+          this.showAlert('❌ Failed to reject: ' + (err?.error?.message || 'Unknown error'));
+          this.cdr.detectChanges();
+        }
+      });
     }
   }
 
@@ -490,6 +513,7 @@ areAllDocumentsApproved(org: BankAdminOrgRegisterResponse | null): boolean {
       this.fetchAllOrganizations();
       this.selectedOrganization = null;
     }
+    this.cdr.detectChanges();
   }
 
   getStatusClass(status: string): string {

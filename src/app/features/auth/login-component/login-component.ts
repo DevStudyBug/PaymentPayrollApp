@@ -1,9 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { RecaptchaModule } from 'ng-recaptcha';
-
 import { LoginRequest } from '../../../core/models/auth.models';
 import { AuthService } from '../../../core/services/auth-service';
 
@@ -17,20 +16,19 @@ import { AuthService } from '../../../core/services/auth-service';
 export class LoginComponent implements OnInit {
   loginForm: FormGroup;
   errorMessage: string = '';
-  captchaError: string = ''; // ✅ Added
+  captchaError: string = '';
   isLoading: boolean = false;
-  captchaResponse: string | null = null; // store captcha token
+  captchaResponse: string | null = null;
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router,
-    private cdr: ChangeDetectorRef 
+    private router: Router
   ) {
     this.loginForm = this.fb.group({
       userName: ['', [Validators.required, Validators.minLength(3)]],
       password: ['', [Validators.required, Validators.minLength(6)]],
-      recaptcha: ['', Validators.required] // Add captcha field
+      recaptcha: ['', Validators.required]
     });
   }
 
@@ -41,26 +39,22 @@ export class LoginComponent implements OnInit {
     });
   }
 
-  //  When captcha is resolved
-onCaptchaResolved(token: string | null): void {
-  if (token) {
-    this.captchaResponse = token;
-    this.captchaError = '';
-    this.loginForm.patchValue({ recaptcha: token });
-     this.cdr.detectChanges();
-  } else {
-    this.captchaResponse = null;
+  onCaptchaResolved(token: string | null): void {
+    if (token) {
+      this.captchaResponse = token;
+      this.captchaError = '';
+      this.loginForm.patchValue({ recaptcha: token });
+    } else {
+      this.captchaResponse = null;
+    }
   }
-}
 
   onSubmit(): void {
     this.errorMessage = '';
     this.captchaError = '';
 
     if (this.loginForm.invalid) {
-      Object.keys(this.loginForm.controls).forEach(key => {
-        this.loginForm.get(key)?.markAsTouched();
-      });
+      this.loginForm.markAllAsTouched();
       return;
     }
 
@@ -80,10 +74,17 @@ onCaptchaResolved(token: string | null): void {
       next: (response) => {
         this.isLoading = false;
 
+        if (response.status === 'FIRST_TIME_LOGIN') {
+          sessionStorage.setItem('tempUserId', response.userId.toString());
+          sessionStorage.setItem('tempEmail', response.email);
+          sessionStorage.setItem('firstTimeLogin', 'true');
+          this.router.navigate(['/change-password']);
+          return;
+        }
+
         if (response.orgStatus === 'PENDING') {
           this.errorMessage = 'Your organization is pending verification. Please wait for admin approval.';
           this.authService.logout();
-          this.cdr.detectChanges();
           return;
         }
 
@@ -92,13 +93,10 @@ onCaptchaResolved(token: string | null): void {
         else if (roles.includes('ORG_ADMIN')) this.router.navigate(['/ORG_ADMIN']);
         else if (roles.includes('EMPLOYEE')) this.router.navigate(['/EMPLOYEE']);
         else this.router.navigate(['/dashboard']);
-
-        if (response.message) console.log(response.message);
       },
       error: (err) => {
         this.isLoading = false;
-        this.errorMessage = err.error?.error || err.error?.message || 'Invalid username or password!';
-        this.cdr.detectChanges();
+        this.errorMessage = err.error?.message || 'Invalid username or password!';
       }
     });
   }
@@ -111,11 +109,3 @@ onCaptchaResolved(token: string | null): void {
     this.router.navigate(['/']);
   }
 }
-
-
-
-//6LdJr-srAAAAAHU_JPUJoGGjtZNZJl9rrDpTXiGd  
-// Use this secret key for communication between your site and reCAPTCHA.
-
-//6LdJr-srAAAAAF1476eJrhpXbpAeAqLbqSIAxBkT 
-//  Use this site key in the HTML code your site serves to users.

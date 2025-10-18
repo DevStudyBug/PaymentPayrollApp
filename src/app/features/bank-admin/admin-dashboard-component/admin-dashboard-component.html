@@ -11,10 +11,18 @@
 
   <!-- Navigation -->
   <nav class="dashboard-nav">
-    <button [class.active]="activeTab === 'overview'" (click)="switchTab('overview')" class="nav-btn">
+    <button
+      [class.active]="activeTab === 'overview'"
+      (click)="switchTab('overview')"
+      class="nav-btn"
+    >
       📊 Overview
     </button>
-    <button [class.active]="activeTab === 'organizations'" (click)="switchTab('organizations')" class="nav-btn">
+    <button
+      [class.active]="activeTab === 'organizations'"
+      (click)="switchTab('organizations')"
+      class="nav-btn"
+    >
       🏢 Organizations
     </button>
     <button [class.active]="activeTab === 'payment'" (click)="switchTab('payment')" class="nav-btn">
@@ -62,24 +70,44 @@
   <!-- ORGANIZATIONS TAB -->
   <div *ngIf="activeTab === 'organizations'" class="tab-content">
     <h2>Manage Organizations</h2>
-    
+
     <!-- Filter -->
     <div class="filter-section">
       <h3>Filter by Status:</h3>
       <div class="filter-buttons">
-        <button [class.active]="orgFilter === 'ALL'" (click)="changeOrgFilter('ALL')" class="filter-btn">
+        <button
+          [class.active]="orgFilter === 'ALL'"
+          (click)="changeOrgFilter('ALL')"
+          class="filter-btn"
+        >
           📊 All ({{ totalOrgCount }})
         </button>
-        <button [class.active]="orgFilter === 'PENDING'" (click)="changeOrgFilter('PENDING')" class="filter-btn">
+        <button
+          [class.active]="orgFilter === 'PENDING'"
+          (click)="changeOrgFilter('PENDING')"
+          class="filter-btn"
+        >
           ⏳ Pending ({{ pendingOrgCount }})
         </button>
-        <button [class.active]="orgFilter === 'UNDER_REVIEW'" (click)="changeOrgFilter('UNDER_REVIEW')" class="filter-btn">
+        <button
+          [class.active]="orgFilter === 'UNDER_REVIEW'"
+          (click)="changeOrgFilter('UNDER_REVIEW')"
+          class="filter-btn"
+        >
           📋 Under Review ({{ underReviewOrgCount }})
         </button>
-        <button [class.active]="orgFilter === 'ACTIVE'" (click)="changeOrgFilter('ACTIVE')" class="filter-btn">
+        <button
+          [class.active]="orgFilter === 'ACTIVE'"
+          (click)="changeOrgFilter('ACTIVE')"
+          class="filter-btn"
+        >
           ✅ Active ({{ activeOrgCount }})
         </button>
-        <button [class.active]="orgFilter === 'REJECTED'" (click)="changeOrgFilter('REJECTED')" class="filter-btn">
+        <button
+          [class.active]="orgFilter === 'REJECTED'"
+          (click)="changeOrgFilter('REJECTED')"
+          class="filter-btn"
+        >
           ❌ Rejected ({{ rejectedOrgCount }})
         </button>
       </div>
@@ -113,20 +141,27 @@
           <h4>Basic Information</h4>
           <p><strong>Name:</strong> {{ selectedOrganization.orgName }}</p>
           <p><strong>Email:</strong> {{ selectedOrganization.email }}</p>
-          <p><strong>Status:</strong> <span [class]="'badge ' + getStatusClass(selectedOrganization.status)">{{ selectedOrganization.status }}</span></p>
-          <p *ngIf="selectedOrganization.message"><strong>Message:</strong> {{ selectedOrganization.message }}</p>
+          <p>
+            <strong>Status:</strong>
+            <span [class]="'badge ' + getStatusClass(selectedOrganization.status)">{{
+              selectedOrganization.status
+            }}</span>
+          </p>
+          <p *ngIf="selectedOrganization.message">
+            <strong>Message:</strong> {{ selectedOrganization.message }}
+          </p>
         </div>
 
         <!-- Bank Account Details - MOVED UP -->
         <div class="info-section" *ngIf="hasBankDetails(selectedOrganization)">
           <h4>Bank Account Details</h4>
           <p>
-            <strong>Verification Status:</strong> 
+            <strong>Verification Status:</strong>
             <span [class]="'badge ' + getStatusClass(selectedOrganization.bankVerificationStatus)">
               {{ selectedOrganization.bankVerificationStatus }}
             </span>
           </p>
-          
+
           <!-- Display bank details grid -->
           <div class="bank-details-grid">
             <div class="bank-detail-item">
@@ -146,63 +181,93 @@
               <span>{{ selectedOrganization.bankName }}</span>
             </div>
           </div>
-          
+
           <p *ngIf="selectedOrganization.bankRemarks" class="mt-10">
-            <strong>Remarks:</strong> <span class="text-danger">{{ selectedOrganization.bankRemarks }}</span>
+            <strong>Remarks:</strong>
+            <span class="text-danger">{{ selectedOrganization.bankRemarks }}</span>
           </p>
-          
+
           <!-- Bank Action Buttons -->
           <div class="action-buttons">
-            <button 
-              (click)="verifyBankDetails()" 
-              class="btn btn-success" 
-              [disabled]="processingAction || selectedOrganization.bankVerificationStatus === 'APPROVED'">
+            <button
+              (click)="verifyBankDetails()"
+              class="btn btn-success"
+              [disabled]="
+                processingAction || selectedOrganization.bankVerificationStatus === 'APPROVED'
+              "
+            >
               ✅ Approve Bank Details
             </button>
-            <button 
-              (click)="openRejectModal('bank', selectedOrganization.orgId)" 
-              class="btn btn-danger" 
-              [disabled]="processingAction">
+
+            <button
+              (click)="openRejectModal('bank', selectedOrganization.orgId)"
+              class="btn btn-danger"
+              [disabled]="
+                processingAction ||
+                selectedOrganization.bankVerificationStatus === 'REJECTED' ||
+                selectedOrganization.bankVerificationStatus === 'APPROVED'
+              "
+            >
               ❌ Reject Bank Details
             </button>
           </div>
         </div>
 
         <!-- Bank Details Not Submitted Alert -->
-        <div class="info-section" *ngIf="!hasBankDetails(selectedOrganization)" style="border-left-color: #f6ad55; background: #fffaf0;">
+        <div
+          class="info-section"
+          *ngIf="!hasBankDetails(selectedOrganization)"
+          style="border-left-color: #f6ad55; background: #fffaf0"
+        >
           <h4>Bank Account Details</h4>
-          <p style="color: #c05621; margin: 0;">
+          <p style="color: #c05621; margin: 0">
             <strong>⚠️ Bank details not yet submitted by organization</strong>
           </p>
         </div>
 
         <!-- Documents -->
-        <div class="info-section" *ngIf="selectedOrganization.documents && selectedOrganization.documents.length > 0">
+        <div
+          class="info-section"
+          *ngIf="selectedOrganization.documents && selectedOrganization.documents.length > 0"
+        >
           <h4>Documents ({{ selectedOrganization.documents.length }})</h4>
           <div class="doc-list">
             <div *ngFor="let doc of selectedOrganization.documents" class="doc-row">
               <div>
-                <p><strong>{{ doc.docName }}</strong></p>
+                <p>
+                  <strong>{{ doc.docName }}</strong>
+                </p>
                 <small>{{ doc.fileName }}</small>
-                <br>
-                <small class="text-muted" *ngIf="doc.uploadedAt">Uploaded: {{ doc.uploadedAt | date:'short' }}</small>
+                <br />
+                <small class="text-muted" *ngIf="doc.uploadedAt"
+                  >Uploaded: {{ doc.uploadedAt | date : 'short' }}</small
+                >
               </div>
               <div class="doc-actions">
                 <span [class]="'badge ' + getStatusClass(doc.status)">{{ doc.status }}</span>
-                <button (click)="viewDocument(doc.fileUrl)" class="btn btn-sm btn-info" title="View Document">
+                <button
+                  (click)="viewDocument(doc.fileUrl)"
+                  class="btn btn-sm btn-info"
+                  title="View Document"
+                >
                   👁️ View
                 </button>
-                <button 
-                  (click)="verifyDocument(doc.docId)" 
-                  class="btn btn-sm btn-success" 
-                  [disabled]="doc.status === 'APPROVED' || processingAction">
-                  Approve
+                <button
+                  (click)="verifyDocument(doc.docId)"
+                  class="btn btn-sm btn-success"
+                  [disabled]="processingAction || doc.status === 'APPROVED'"
+                >
+                  ✅ Approve
                 </button>
-                <button 
-                  (click)="openRejectModal('document', 0, doc.docId)" 
-                  class="btn btn-sm btn-danger" 
-                  [disabled]="processingAction">
-                  Reject
+
+                <button
+                  (click)="openRejectModal('document', 0, doc.docId)"
+                  class="btn btn-sm btn-danger"
+                  [disabled]="
+                    processingAction || doc.status === 'APPROVED' || doc.status === 'REJECTED'
+                  "
+                >
+                  ❌ Reject
                 </button>
               </div>
             </div>
@@ -210,15 +275,20 @@
         </div>
 
         <!-- Organization Actions -->
-        <div class="info-section" *ngIf="selectedOrganization.status !== 'ACTIVE' && selectedOrganization.status !== 'REJECTED'">
+        <div
+          class="info-section"
+          *ngIf="
+            selectedOrganization.status !== 'ACTIVE' && selectedOrganization.status !== 'REJECTED'
+          "
+        >
           <h4>Organization Actions</h4>
-          
+
           <!-- Show requirements if not met -->
           <div *ngIf="!canVerifyOrganization(selectedOrganization)" class="mb-10">
-            <p class="text-danger" style="margin-bottom: 10px;">
+            <p class="text-danger" style="margin-bottom: 10px">
               <strong>⚠️ Requirements not met. Please complete the following:</strong>
             </p>
-            <ul style="margin-left: 20px; color: #e53e3e;">
+            <ul style="margin-left: 20px; color: #e53e3e">
               <li *ngIf="!areAllDocumentsApproved(selectedOrganization)">
                 ❌ All documents must be approved
               </li>
@@ -227,21 +297,27 @@
               </li>
             </ul>
           </div>
-          
+
           <div class="action-buttons">
-            <button 
-              (click)="verifyOrganization(selectedOrganization.orgId)" 
-              class="btn btn-success" 
+            <button
+              (click)="verifyOrganization(selectedOrganization.orgId)"
+              class="btn btn-success"
               [disabled]="processingAction || !canVerifyOrganization(selectedOrganization)"
-              [title]="!canVerifyOrganization(selectedOrganization) ? 'Please approve all documents and bank details first' : 'Verify and activate organization'">
+              [title]="
+                !canVerifyOrganization(selectedOrganization)
+                  ? 'Please approve all documents and bank details first'
+                  : 'Verify and activate organization'
+              "
+            >
               ✅ Verify Organization
             </button>
-            <button 
-              (click)="openRejectModal('org', selectedOrganization.orgId)" 
-              class="btn btn-danger" 
-              [disabled]="processingAction">
+            <!-- <button
+              (click)="openRejectModal('org', selectedOrganization.orgId)"
+              class="btn btn-danger"
+              [disabled]="processingAction"
+            >
               ❌ Reject Organization
-            </button>
+            </button> -->
           </div>
         </div>
       </div>
@@ -292,10 +368,14 @@
             <td>{{ payment.organizationName }}</td>
             <td>{{ payment.requestType }}</td>
             <td>{{ payment.amount | currency }}</td>
-            <td><span [class]="'badge ' + getStatusClass(payment.status)">{{ payment.status }}</span></td>
-            <td>{{ payment.requestDate | date:'short' }}</td>
             <td>
-              <button (click)="selectPaymentRequest(payment.paymentId)" class="btn btn-sm btn-info">View</button>
+              <span [class]="'badge ' + getStatusClass(payment.status)">{{ payment.status }}</span>
+            </td>
+            <td>{{ payment.requestDate | date : 'short' }}</td>
+            <td>
+              <button (click)="selectPaymentRequest(payment.paymentId)" class="btn btn-sm btn-info">
+                View
+              </button>
             </td>
           </tr>
         </tbody>
@@ -304,9 +384,17 @@
 
     <!-- Pagination -->
     <div class="pagination" *ngIf="totalPages > 0">
-      <button (click)="previousPage()" [disabled]="currentPage === 0" class="btn btn-secondary">← Previous</button>
+      <button (click)="previousPage()" [disabled]="currentPage === 0" class="btn btn-secondary">
+        ← Previous
+      </button>
       <span class="page-info">Page {{ currentPage + 1 }} of {{ totalPages }}</span>
-      <button (click)="nextPage()" [disabled]="currentPage >= totalPages - 1" class="btn btn-secondary">Next →</button>
+      <button
+        (click)="nextPage()"
+        [disabled]="currentPage >= totalPages - 1"
+        class="btn btn-secondary"
+      >
+        Next →
+      </button>
     </div>
   </div>
 
@@ -324,13 +412,25 @@
         <p><strong>Organization:</strong> {{ selectedPaymentRequest.orgName }}</p>
         <p><strong>Type:</strong> {{ selectedPaymentRequest.requestType }}</p>
         <p><strong>Amount:</strong> {{ selectedPaymentRequest.amount | currency }}</p>
-        <p><strong>Status:</strong> <span [class]="'badge ' + getStatusClass(selectedPaymentRequest.status)">{{ selectedPaymentRequest.status }}</span></p>
-        <p><strong>Date:</strong> {{ selectedPaymentRequest.requestDate | date:'medium' }}</p>
-        <p *ngIf="selectedPaymentRequest.description"><strong>Description:</strong> {{ selectedPaymentRequest.description }}</p>
+        <p>
+          <strong>Status:</strong>
+          <span [class]="'badge ' + getStatusClass(selectedPaymentRequest.status)">{{
+            selectedPaymentRequest.status
+          }}</span>
+        </p>
+        <p><strong>Date:</strong> {{ selectedPaymentRequest.requestDate | date : 'medium' }}</p>
+        <p *ngIf="selectedPaymentRequest.description">
+          <strong>Description:</strong> {{ selectedPaymentRequest.description }}
+        </p>
       </div>
 
       <!-- Disbursements -->
-      <div class="info-section" *ngIf="selectedPaymentRequest.disbursements && selectedPaymentRequest.disbursements.length > 0">
+      <div
+        class="info-section"
+        *ngIf="
+          selectedPaymentRequest.disbursements && selectedPaymentRequest.disbursements.length > 0
+        "
+      >
         <h4>Disbursements</h4>
         <div class="table-wrapper">
           <table class="payment-table">
@@ -346,8 +446,14 @@
               <tr *ngFor="let dis of selectedPaymentRequest.disbursements">
                 <td>{{ dis.employeeName }}</td>
                 <td>{{ dis.netSalary | currency }}</td>
-                <td><span [class]="'badge ' + getStatusClass(dis.status)">{{ dis.status }}</span></td>
-                <td><span [class]="'badge ' + getStatusClass(dis.bankStatus)">{{ dis.bankStatus }}</span></td>
+                <td>
+                  <span [class]="'badge ' + getStatusClass(dis.status)">{{ dis.status }}</span>
+                </td>
+                <td>
+                  <span [class]="'badge ' + getStatusClass(dis.bankStatus)">{{
+                    dis.bankStatus
+                  }}</span>
+                </td>
               </tr>
             </tbody>
           </table>
@@ -360,33 +466,40 @@
         <div class="action-buttons">
           <ng-container [ngSwitch]="selectedPaymentRequest.status">
             <ng-container *ngSwitchCase="'PENDING'">
-              <button 
-                (click)="approvePayment(selectedPaymentRequest.paymentId)" 
-                class="btn btn-success" 
-                [disabled]="processingAction">
+              <button
+                (click)="approvePayment(selectedPaymentRequest.paymentId)"
+                class="btn btn-success"
+                [disabled]="processingAction || selectedPaymentRequest.status !== 'PENDING'"
+              >
                 ✅ Approve Payment
               </button>
-              <button 
-                (click)="openRejectModal('payment', selectedPaymentRequest.paymentId)" 
-                class="btn btn-danger" 
-                [disabled]="processingAction">
+              <button
+                (click)="openRejectModal('payment', selectedPaymentRequest.paymentId)"
+                class="btn btn-danger"
+                [disabled]="processingAction || selectedPaymentRequest.status !== 'PENDING'"
+              >
                 ❌ Reject Payment
               </button>
             </ng-container>
+
             <ng-container *ngSwitchCase="'APPROVED'">
-              <button 
-                (click)="disbursePayment(selectedPaymentRequest.paymentId)" 
-                class="btn btn-success" 
-                [disabled]="processingAction">
+              <button
+                (click)="disbursePayment(selectedPaymentRequest.paymentId)"
+                class="btn btn-success"
+                [disabled]="processingAction || selectedPaymentRequest.status !== 'APPROVED'"
+              >
                 💸 Disburse Payment
               </button>
-              <button 
-                (click)="openRejectModal('payment', selectedPaymentRequest.paymentId)" 
-                class="btn btn-danger" 
-                [disabled]="processingAction">
+              <button
+                (click)="openRejectModal('payment', selectedPaymentRequest.paymentId)"
+                class="btn btn-danger"
+                [disabled]="processingAction || selectedPaymentRequest.status !== 'APPROVED'"
+              >
                 ❌ Reject Payment
               </button>
             </ng-container>
+
+            
             <ng-container *ngSwitchDefault>
               <p class="text-muted">No actions available for this status</p>
             </ng-container>
@@ -405,24 +518,25 @@
       </div>
       <div class="modal-body">
         <label for="rejectReason">Please provide a reason for rejection:</label>
-        <textarea 
+        <textarea
           id="rejectReason"
-          [(ngModel)]="rejectReason" 
-          placeholder="Enter reason..." 
-          rows="5" 
-          class="form-control">
+          [(ngModel)]="rejectReason"
+          placeholder="Enter reason..."
+          rows="5"
+          class="form-control"
+        >
         </textarea>
       </div>
       <div class="modal-footer">
         <button (click)="closeRejectModal()" class="btn btn-secondary">Cancel</button>
-        <button 
-          (click)="submitReject()" 
-          class="btn btn-danger" 
-          [disabled]="processingAction || !rejectReason.trim()">
+        <button
+          (click)="submitReject()"
+          class="btn btn-danger"
+          [disabled]="processingAction || !rejectReason.trim()"
+        >
           Submit
         </button>
       </div>
     </div>
   </div>
-
 </div>

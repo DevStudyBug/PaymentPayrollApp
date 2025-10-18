@@ -141,7 +141,7 @@ export class BankAdminService {
   }
 
   approvePaymentRequest(paymentRequestId: number): Observable<PayrollActionResponse> {
-    return this.http.put<PayrollActionResponse>(
+    return this.http.patch<PayrollActionResponse>(
       `${this.apiUrl}/approve/${paymentRequestId}`,
       {},
       { headers: this.getHeaders() }
@@ -149,7 +149,7 @@ export class BankAdminService {
   }
 
   rejectPaymentRequest(paymentRequestId: number, rejectRequest: RejectRequest): Observable<PayrollActionResponse> {
-    return this.http.put<PayrollActionResponse>(
+    return this.http.patch<PayrollActionResponse>(
       `${this.apiUrl}/reject/${paymentRequestId}`,
       rejectRequest,
       { headers: this.getHeaders() }
@@ -157,7 +157,7 @@ export class BankAdminService {
   }
 
   disbursePayment(paymentRequestId: number): Observable<PayrollActionResponse> {
-    return this.http.put<PayrollActionResponse>(
+    return this.http.patch<PayrollActionResponse>(
       `${this.apiUrl}/disburse/${paymentRequestId}`,
       {},
       { headers: this.getHeaders() }

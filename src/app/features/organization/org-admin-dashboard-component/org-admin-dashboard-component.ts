@@ -1,7 +1,14 @@
 // org-admin-dashboard-component.ts
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormArray, FormsModule } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+  FormArray,
+  FormsModule,
+} from '@angular/forms';
 import { Router } from '@angular/router';
 import { OrganizationService } from '../../../core/services/organization-service';
 import { AuthService } from '../../../core/services/auth-service';
@@ -49,33 +56,32 @@ export class OrgAdminDashboardComponent implements OnInit {
   allowedDocumentTypes = ['PAN', 'GST', 'LICENSE'];
 
   // view salary template with other properties
-showSalaryTemplateModal = false;
-selectedSalaryTemplate: any = null;
+  showSalaryTemplateModal = false;
+  selectedSalaryTemplate: any = null;
 
-//view register employee with other properties
-//showEmployeeModal = false;
-selectedEmployee: any = null;
-showEmployeeDetailModal = false;
+  //view register employee with other properties
+  //showEmployeeModal = false;
+  selectedEmployee: any = null;
+  showEmployeeDetailModal = false;
 
+  //vendor properties section
+  vendors: any[] = [];
+  vendorPaymentRequests: any[] = [];
+  showVendorModal = false;
+  showVendorPaymentModal = false;
+  showVendorDetailModal = false;
+  selectedVendor: any = null;
+  vendorForm!: FormGroup;
+  vendorPaymentForm!: FormGroup;
 
- //vendor properties section
-vendors: any[] = [];
-vendorPaymentRequests: any[] = [];
-showVendorModal = false;
-showVendorPaymentModal = false;
-showVendorDetailModal = false;
-selectedVendor: any = null;
-vendorForm!: FormGroup;
-vendorPaymentForm!: FormGroup;
+  // view payment with other properties
+  showPaymentDetailModal = false;
+  selectedPaymentRequest: any = null;
 
-// view payment with other properties
-showPaymentDetailModal = false;
-selectedPaymentRequest: any = null;
-
-//view concern details with other properties
-selectedConcern: any = null;
-showConcernModal = false;
-concernResponseText = '';
+  //view concern details with other properties
+  selectedConcern: any = null;
+  showConcernModal = false;
+  concernResponseText = '';
 
   private destroy$ = new Subject<void>();
 
@@ -137,38 +143,41 @@ concernResponseText = '';
     });
 
     //vendor initializeForms() method
-// Vendor Form
-// Vendor Form
-this.vendorForm = this.fb.group({
-  name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
-  contactPerson: ['', [Validators.maxLength(100)]],
-  email: ['', [Validators.required, Validators.email, Validators.maxLength(100)]],
-  phoneNumber: ['', [Validators.required, Validators.pattern(/^[0-9]{10}$/)]],
-  address: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(500)]],
-  bankName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
-  bankAccountNumber: ['', [Validators.required, Validators.pattern(/^[0-9]{12}$/)]],
-  ifscCode: ['', [Validators.required, Validators.pattern(/^[A-Z]{4}0[A-Z0-9]{6}$/)]],
-// type: ['VENDOR', Validators.required]
-});
+    // Vendor Form
+    // Vendor Form
+    this.vendorForm = this.fb.group({
+      name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
+      contactPerson: ['', [Validators.maxLength(100)]],
+      email: ['', [Validators.required, Validators.email, Validators.maxLength(100)]],
+      phoneNumber: ['', [Validators.required, Validators.pattern(/^[0-9]{10}$/)]],
+      address: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(500)]],
+      bankName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
+      bankAccountNumber: ['', [Validators.required, Validators.pattern(/^[0-9]{12}$/)]],
+      ifscCode: ['', [Validators.required, Validators.pattern(/^[A-Z]{4}0[A-Z0-9]{6}$/)]],
+      // type: ['VENDOR', Validators.required]
+    });
 
-// Vendor Payment Request Form
-this.vendorPaymentForm = this.fb.group({
-  vendorId: ['', Validators.required],
-  amount: ['', [Validators.required, Validators.min(1)]],
-  description: ['', [Validators.required, Validators.minLength(10)]],
-  requestType: ['VENDOR', Validators.required]
-});
+    // Vendor Payment Request Form
+    this.vendorPaymentForm = this.fb.group({
+      vendorId: ['', Validators.required],
+      amount: ['', [Validators.required, Validators.min(1)]],
+      description: ['', [Validators.required, Validators.minLength(10)]],
+      requestType: ['VENDOR', Validators.required],
+    });
   }
 
   // Create a single document form group
- createDocumentFormGroup(fileType?: string): FormGroup {
-  return this.fb.group({
-    file: [null, Validators.required],
-    fileName: [{ value: fileType ? `${fileType} Document` : '', disabled: true }, Validators.required],
-    fileType: [{ value: fileType || '', disabled: true }, Validators.required]
-  });
-}
-  // Check if onboarding is complete    
+  createDocumentFormGroup(fileType?: string): FormGroup {
+    return this.fb.group({
+      file: [null, Validators.required],
+      fileName: [
+        { value: fileType ? `${fileType} Document` : '', disabled: true },
+        Validators.required,
+      ],
+      fileType: [{ value: fileType || '', disabled: true }, Validators.required],
+    });
+  }
+  // Check if onboarding is complete
   isOrganizationActive(): boolean {
     return this.onboardingStatus?.organizationStatus === 'ACTIVE';
   }
@@ -237,8 +246,8 @@ this.vendorPaymentForm = this.fb.group({
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data) => {
+          console.log('Designations received:', data);
           this.designations = data || [];
-          this.cdr.detectChanges();
         },
         error: (error) => {
           console.error('Failed to load designations', error);
@@ -253,9 +262,10 @@ this.vendorPaymentForm = this.fb.group({
       .subscribe({
         next: (data) => {
           this.salaryTemplates = data.content || [];
+          this.cdr.detectChanges();
           this.totalElements = data.totalElements || 0;
           this.totalPages = data.totalPages || 0;
-          this.cdr.detectChanges();
+          // this.cdr.detectChanges();
         },
         error: (error) => {
           console.error('Failed to load salary templates', error);
@@ -298,49 +308,46 @@ this.vendorPaymentForm = this.fb.group({
   }
 
   // Document Upload
-openDocumentModal(): void {
-  const docs = this.onboardingStatus?.documents || [];
+  openDocumentModal(): void {
+    const docs = this.onboardingStatus?.documents || [];
 
-  // ✅ 1. If no onboarding data, don't open
-  if (!this.onboardingStatus) {
-    this.showError('Onboarding status not available. Please refresh the page.');
-    return;
+    // ✅ 1. If no onboarding data, don't open
+    if (!this.onboardingStatus) {
+      this.showError('Onboarding status not available. Please refresh the page.');
+      return;
+    }
+
+    // ✅ 2. If any document is rejected, prevent modal
+    const hasRejected = docs.some((d: any) => d.status?.toUpperCase() === 'REJECTED');
+    if (hasRejected) {
+      this.showError('One or more documents were rejected. Please reupload them individually.');
+      return;
+    }
+
+    // ✅ 3. Determine which documents are missing (for first-time upload)
+    const uploadedTypes = docs.map((d: any) => d.fileType?.toUpperCase());
+    const missingDocs = this.allowedDocumentTypes.filter(
+      (type) => !uploadedTypes.includes(type.toUpperCase())
+    );
+
+    // ✅ 4. If all required documents exist, block modal
+    if (missingDocs.length === 0) {
+      this.showError('All documents have already been uploaded or are under review.');
+      return;
+    }
+
+    // ✅ 5. Otherwise, proceed to open modal for missing docs only
+    this.showDocumentModal = true;
+
+    this.documentUploadForm = this.fb.group({
+      documents: this.fb.array([]),
+    });
+
+    // Create form groups for missing docs
+    missingDocs.forEach((type) => {
+      this.documentsArray.push(this.createDocumentFormGroup(type));
+    });
   }
-
-  // ✅ 2. If any document is rejected, prevent modal
-  const hasRejected = docs.some((d: any) => d.status?.toUpperCase() === 'REJECTED');
-  if (hasRejected) {
-    this.showError('One or more documents were rejected. Please reupload them individually.');
-    return;
-  }
-
-  // ✅ 3. Determine which documents are missing (for first-time upload)
-  const uploadedTypes = docs.map((d: any) => d.fileType?.toUpperCase());
-  const missingDocs = this.allowedDocumentTypes.filter(
-    (type) => !uploadedTypes.includes(type.toUpperCase())
-  );
-
-  // ✅ 4. If all required documents exist, block modal
-  if (missingDocs.length === 0) {
-    this.showError('All documents have already been uploaded or are under review.');
-    return;
-  }
-
-  // ✅ 5. Otherwise, proceed to open modal for missing docs only
-  this.showDocumentModal = true;
-
-  this.documentUploadForm = this.fb.group({
-    documents: this.fb.array([])
-  });
-
-  // Create form groups for missing docs
-  missingDocs.forEach((type) => {
-    this.documentsArray.push(this.createDocumentFormGroup(type));
-  });
-}
-
-
-
 
   closeDocumentModal(): void {
     this.showDocumentModal = false;
@@ -494,8 +501,12 @@ openDocumentModal(): void {
           this.cdr.detectChanges();
         },
         error: (error) => {
+          this.isLoading = false;
           console.error('Failed to submit bank details:', error);
-          this.showError(error.error?.message || 'Failed to submit bank details');
+          this.showError(
+            error.error?.message || error.error?.error || 'Failed to submit bank details'
+          );
+          this.cdr.detectChanges();
         },
       });
   }
@@ -522,13 +533,16 @@ openDocumentModal(): void {
       )
       .subscribe({
         next: (response) => {
+          this.isLoading = false;
           this.showSuccess('✅ Designation added successfully');
           this.designationForm.reset();
-          this.loadDesignations();
+          // this.loadDesignations();
           this.cdr.detectChanges();
         },
         error: (error) => {
-          this.showError(error.error?.message || 'Failed to add designation');
+          this.isLoading = false;
+          this.showError(error.error?.message || error.error?.error || 'Failed to add designation');
+          this.cdr.detectChanges();
         },
       });
   }
@@ -560,59 +574,60 @@ openDocumentModal(): void {
         },
         error: (error) => {
           this.showError(error.error?.message || 'Failed to create salary template');
-           this.cdr.detectChanges();
+          this.cdr.detectChanges();
         },
       });
   }
-//view salary   
-// REPLACE YOUR viewSalaryTemplate METHOD WITH THIS ENHANCED VERSION:
+  //view salary
+  // REPLACE YOUR viewSalaryTemplate METHOD WITH THIS ENHANCED VERSION:
 
-viewSalaryTemplate(template: any): void {
-  // Show modal immediately with available data
-  this.selectedSalaryTemplate = template;
-  this.showSalaryTemplateModal = true;
-  
-  // Try to fetch full details from API (with error handling)
-  this.isLoading = true;
-  
-  this.orgService.getSalaryTemplateById(template.templateId)
-    .pipe(
-      takeUntil(this.destroy$),
-      finalize(() => this.isLoading = false)
-    )
-    .subscribe({
-      next: (data) => {
-        // Update with full details if available
-        this.selectedSalaryTemplate = data;
-        this.cdr.detectChanges();
-      },
-      error: (error) => {
-        console.error('Failed to load full salary template details', error);
-        // Don't show error message, just use the basic data we already have
-        // The modal will show gross and net salary at minimum
-        this.cdr.detectChanges();
-      }
-    });
-}
+  viewSalaryTemplate(template: any): void {
+    // Show modal immediately with available data
+    this.selectedSalaryTemplate = template;
+    this.showSalaryTemplateModal = true;
 
-// Keep this method as is:
-closeSalaryTemplateModal(): void {
-  this.showSalaryTemplateModal = false;
-  this.selectedSalaryTemplate = null;
-}
+    // Try to fetch full details from API (with error handling)
+    this.isLoading = true;
 
-// ADD THIS HELPER METHOD to check if detailed breakdown is available:
-hasDetailedBreakdown(): boolean {
-  return this.selectedSalaryTemplate && 
-         (this.selectedSalaryTemplate.basicSalary !== undefined || 
-          this.selectedSalaryTemplate.hra !== undefined);
-}
-//end of view salary
+    this.orgService
+      .getSalaryTemplateById(template.templateId)
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => (this.isLoading = false))
+      )
+      .subscribe({
+        next: (data) => {
+          // Update with full details if available
+          this.selectedSalaryTemplate = data;
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+          console.error('Failed to load full salary template details', error);
+          // Don't show error message, just use the basic data we already have
+          // The modal will show gross and net salary at minimum
+          this.cdr.detectChanges();
+        },
+      });
+  }
 
+  // Keep this method as is:
+  closeSalaryTemplateModal(): void {
+    this.showSalaryTemplateModal = false;
+    this.selectedSalaryTemplate = null;
+  }
 
+  // ADD THIS HELPER METHOD to check if detailed breakdown is available:
+  hasDetailedBreakdown(): boolean {
+    return (
+      this.selectedSalaryTemplate &&
+      (this.selectedSalaryTemplate.basicSalary !== undefined ||
+        this.selectedSalaryTemplate.hra !== undefined)
+    );
+  }
+  //end of view salary
 
-  // Employee Management 
- registerEmployee(): void {
+  // Employee Management
+  registerEmployee(): void {
     if (this.employeeForm.invalid) {
       this.showError('Please fill all required fields correctly');
       return;
@@ -656,6 +671,7 @@ hasDetailedBreakdown(): boolean {
 
     if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
       this.showError('Please upload a valid Excel file (.xlsx or .xls)');
+      this.cdr.detectChanges();
       return;
     }
 
@@ -665,6 +681,8 @@ hasDetailedBreakdown(): boolean {
     }
 
     this.isLoading = true;
+    this.cdr.detectChanges();
+
     this.orgService
       .uploadEmployeesExcel(file)
       .pipe(
@@ -672,233 +690,264 @@ hasDetailedBreakdown(): boolean {
         finalize(() => {
           this.isLoading = false;
           event.target.value = '';
+          this.cdr.detectChanges();
         })
       )
       .subscribe({
         next: (response) => {
-          const successCount = response.successfulRegistrations?.length || 0;
-          const failedCount = response.failedRegistrations?.length || 0;
+          const successList = response.successfulRegistrations || [];
+          const failedList = response.failedRegistrations || [];
 
-          if (successCount > 0) {
-            this.showSuccess(`✅ ${successCount} employees registered successfully`);
-            this.cdr.detectChanges(); 
+          // ✅ Show successful registrations with credentials
+          if (successList.length > 0) {
+            const successMsg = successList
+              .map(
+                (emp: any, i: number) =>
+                  `${i + 1}. Username: ${emp.username} | Temporary Password: ${
+                    emp.temporaryPassword
+                  }`
+              )
+              .join('\n');
+            this.showSuccess(
+              `✅ ${successList.length} employee(s) registered successfully:\n${successMsg}`
+            );
           }
-          if (failedCount > 0) {
-            this.showError(`⚠️ ${failedCount} employees failed to register`);
-            this.cdr.detectChanges();
+
+          // ❌ Show detailed failed records if present
+          if (failedList.length > 0) {
+            const failedMsg = failedList.join('\n');
+            this.showError(`⚠️ ${failedList.length} employee(s) failed:\n${failedMsg}`);
           }
 
           this.loadEmployees();
           this.cdr.detectChanges();
         },
         error: (error) => {
-          this.showError(error.error?.message || 'Failed to upload employees');
+          console.error('Excel Upload Error:', error);
+
+          const errorMsg =
+            error.error?.error || // backend sends {"error": "..."}
+            error.error?.message ||
+            error.message ||
+            'Failed to upload employees.';
+
+          const match = errorMsg.match(/Errors:\s*\[(.*)\]/);
+          if (match && match[1]) {
+            const parsedErrors = match[1]
+              .split(',')
+              .map((e: string) => e.trim())
+              .filter(Boolean);
+
+            const formattedErrors = parsedErrors.join('\n');
+            this.showError(`❌ Upload failed:\n${formattedErrors}`);
+          } else {
+            this.showError(errorMsg);
+          }
+
           this.cdr.detectChanges();
         },
       });
   }
 
-
   // View Employee Details START
-// ADD THIS METHOD TO LOAD EMPLOYEE DETAILS
-viewEmployeeDetails(employeeId: number): void {
-  this.isLoading = true;
-  
-  this.orgService.getEmployeeDetails(employeeId)
-    .pipe(
-      takeUntil(this.destroy$),
-      finalize(() => this.isLoading = false)
-    )
-    .subscribe({
-      next: (data) => {
-        console.log('Employee Details:', data);
-        this.selectedEmployee = data;
-        this.showEmployeeDetailModal = true;
-        this.cdr.detectChanges();
-      },
-      error: (error) => {
-        console.error('Failed to load employee details', error);
-        this.showError('Failed to load employee details');
-      }
-    });
-}
+  // ADD THIS METHOD TO LOAD EMPLOYEE DETAILS
+  viewEmployeeDetails(employeeId: number): void {
+    this.isLoading = true;
 
-closeEmployeeDetailModal(): void {
-  this.showEmployeeDetailModal = false;
-  this.selectedEmployee = null;
-}
-
-// Helper method to get document count by status
-getDocumentCountByStatus(status: string): number {
-  if (!this.selectedEmployee?.documents) return 0;
-  return this.selectedEmployee.documents.filter((doc: any) => 
-    doc.status?.toUpperCase() === status.toUpperCase()
-  ).length;
-}
-
-// Helper method to check if all documents are approved
-areAllDocumentsApproved(): boolean {
-  if (!this.selectedEmployee?.documents || this.selectedEmployee.documents.length === 0) {
-    return false;
-  }
-  return this.selectedEmployee.documents.every((doc: any) => 
-    doc.status?.toUpperCase() === 'APPROVED'
-  );
-}
-
-// Helper method to check if bank details are approved
-isBankDetailsApproved(): boolean {
-  return this.selectedEmployee?.bankDetails?.status?.toUpperCase() === 'APPROVED';
-}
-
-// Helper method to check if employee can be activated
-canActivateEmployee(): boolean {
-  return this.areAllDocumentsApproved() && this.isBankDetailsApproved();
-}
-
-// Method to approve/activate employee
-approveEmployee(): void {
-  if (!this.canActivateEmployee()) {
-    this.showError('Cannot activate employee. Please approve all documents and bank details first.');
-    return;
+    this.orgService
+      .getEmployeeDetails(employeeId)
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => (this.isLoading = false))
+      )
+      .subscribe({
+        next: (data) => {
+          console.log('Employee Details:', data);
+          this.selectedEmployee = data;
+          this.showEmployeeDetailModal = true;
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+          console.error('Failed to load employee details', error);
+          this.showError('Failed to load employee details');
+        },
+      });
   }
 
-  if (!confirm(`Are you sure you want to activate ${this.selectedEmployee.name}?`)) {
-    return;
+  closeEmployeeDetailModal(): void {
+    this.showEmployeeDetailModal = false;
+    this.selectedEmployee = null;
   }
 
-  this.isLoading = true;
-  
-  this.orgService.completeEmployeeOnboarding(this.selectedEmployee.employeeId)
-    .pipe(
-      takeUntil(this.destroy$),
-      finalize(() => this.isLoading = false)
-    )
-    .subscribe({
-      next: (response) => {
-        this.showSuccess('✅ Employee activated successfully');
-        this.closeEmployeeDetailModal();
-        this.loadEmployees();
-        this.cdr.detectChanges();
-      },
-      error: (error) => {
-        this.showError(error.error?.message || 'Failed to activate employee');
-      }
-    });
-}
+  // Helper method to get document count by status
+  getDocumentCountByStatus(status: string): number {
+    if (!this.selectedEmployee?.documents) return 0;
+    return this.selectedEmployee.documents.filter(
+      (doc: any) => doc.status?.toUpperCase() === status.toUpperCase()
+    ).length;
+  }
 
-// Method to verify document
-verifyDocument(documentId: number, approved: boolean): void {
-  const action = approved ? 'approve' : 'reject';
-  
-  // If rejecting, ask for remarks
-  let remarks: string | null = null;
-  if (!approved) {
-    const reason = prompt('Please provide a rejection reason:');
-    if (!reason || reason.trim() === '') {
-      this.showError('Rejection reason is required');
+  // Helper method to check if all documents are approved
+  areAllDocumentsApproved(): boolean {
+    if (!this.selectedEmployee?.documents || this.selectedEmployee.documents.length === 0) {
+      return false;
+    }
+    return this.selectedEmployee.documents.every(
+      (doc: any) => doc.status?.toUpperCase() === 'APPROVED'
+    );
+  }
+
+  // Helper method to check if bank details are approved
+  isBankDetailsApproved(): boolean {
+    return this.selectedEmployee?.bankDetails?.status?.toUpperCase() === 'APPROVED';
+  }
+
+  // Helper method to check if employee can be activated
+  canActivateEmployee(): boolean {
+    return this.areAllDocumentsApproved() && this.isBankDetailsApproved();
+  }
+
+  // Method to approve/activate employee
+  approveEmployee(): void {
+    if (!this.canActivateEmployee()) {
+      this.showError(
+        'Cannot activate employee. Please approve all documents and bank details first.'
+      );
       return;
     }
-    remarks = reason.trim();
-  }
 
-  if (!confirm(`Are you sure you want to ${action} this document?`)) {
-    return;
-  }
-
-  this.isLoading = true;
-  
-  // ✅ CORRECT: Send boolean true/false, NOT string "true"/"false"
-  const request = {
-    approved: approved,    // true or false (boolean)
-    remarks: remarks
-  };
-
-  console.log('Verify Document Request:', request);
-
-  this.orgService.verifyEmployeeDocument(
-    this.selectedEmployee.employeeId, 
-    documentId, 
-    request
-  )
-    .pipe(
-      takeUntil(this.destroy$),
-      finalize(() => this.isLoading = false)
-    )
-    .subscribe({
-      next: (response) => {
-        this.showSuccess(`✅ Document ${action}d successfully`);
-        this.viewEmployeeDetails(this.selectedEmployee.employeeId);
-        this.cdr.detectChanges();
-      },
-      error: (error) => {
-        console.error(`Failed to ${action} document:`, error);
-        this.showError(error.error?.message || `Failed to ${action} document`);
-        this.cdr.detectChanges();
-      }
-    });
-}
-
-// REPLACE YOUR verifyBankDetails METHOD WITH THIS:
-
-verifyBankDetails(approved: boolean): void {
-  const action = approved ? 'approve' : 'reject';
-  
-  // If rejecting, ask for remarks
-  let remarks: string | null = null;
-  if (!approved) {
-    const reason = prompt('Please provide a rejection reason:');
-    if (!reason || reason.trim() === '') {
-      this.showError('Rejection reason is required');
+    if (!confirm(`Are you sure you want to activate ${this.selectedEmployee.name}?`)) {
       return;
     }
-    remarks = reason.trim();
+
+    this.isLoading = true;
+
+    this.orgService
+      .completeEmployeeOnboarding(this.selectedEmployee.employeeId)
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => (this.isLoading = false))
+      )
+      .subscribe({
+        next: (response) => {
+          this.showSuccess('✅ Employee activated successfully');
+          this.closeEmployeeDetailModal();
+          this.loadEmployees();
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+          this.showError(error.error?.message || 'Failed to activate employee');
+        },
+      });
   }
 
-  if (!confirm(`Are you sure you want to ${action} bank details?`)) {
-    return;
-  }
+  // Method to verify document
+  verifyDocument(documentId: number, approved: boolean): void {
+    const action = approved ? 'approve' : 'reject';
 
-  this.isLoading = true;
-  
-  // ✅ CORRECT: Send boolean true/false, NOT string "true"/"false"
-  const request = {
-    approved: approved,    // true or false (boolean)
-    remarks: remarks
-  };
-
-  console.log('Verify Bank Details Request:', request);
-
-  this.orgService.verifyEmployeeBankDetails(
-    this.selectedEmployee.employeeId, 
-    request
-  )
-    .pipe(
-      takeUntil(this.destroy$),
-      finalize(() => this.isLoading = false)
-    )
-    .subscribe({
-      next: (response) => {
-        this.showSuccess(`✅ Bank details ${action}d successfully`);
-        this.viewEmployeeDetails(this.selectedEmployee.employeeId);
-        this.cdr.detectChanges();
-      },
-      error: (error) => {
-        console.error(`Failed to ${action} bank details:`, error);
-        this.showError(error.error?.message || `Failed to ${action} bank details`);
-        this.cdr.detectChanges();
+    // If rejecting, ask for remarks
+    let remarks: string | null = null;
+    if (!approved) {
+      const reason = prompt('Please provide a rejection reason:');
+      if (!reason || reason.trim() === '') {
+        this.showError('Rejection reason is required');
+        return;
       }
-    });
-}
-//END EMployee DETAILS
+      remarks = reason.trim();
+    }
 
-viewDocument(fileUrl: string): void {
-  if (!fileUrl) {
-    this.showError('Document URL not available');
-    return;
+    if (!confirm(`Are you sure you want to ${action} this document?`)) {
+      return;
+    }
+
+    this.isLoading = true;
+
+    // ✅ CORRECT: Send boolean true/false, NOT string "true"/"false"
+    const request = {
+      approved: approved, // true or false (boolean)
+      remarks: remarks,
+    };
+
+    console.log('Verify Document Request:', request);
+
+    this.orgService
+      .verifyEmployeeDocument(this.selectedEmployee.employeeId, documentId, request)
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => (this.isLoading = false))
+      )
+      .subscribe({
+        next: (response) => {
+          this.showSuccess(`✅ Document ${action}d successfully`);
+          this.viewEmployeeDetails(this.selectedEmployee.employeeId);
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+          console.error(`Failed to ${action} document:`, error);
+          this.showError(error.error?.message || `Failed to ${action} document`);
+          this.cdr.detectChanges();
+        },
+      });
   }
-  window.open(fileUrl, '_blank');
-}
+
+  // REPLACE YOUR verifyBankDetails METHOD WITH THIS:
+
+  verifyBankDetails(approved: boolean): void {
+    const action = approved ? 'approve' : 'reject';
+
+    // If rejecting, ask for remarks
+    let remarks: string | null = null;
+    if (!approved) {
+      const reason = prompt('Please provide a rejection reason:');
+      if (!reason || reason.trim() === '') {
+        this.showError('Rejection reason is required');
+        return;
+      }
+      remarks = reason.trim();
+    }
+
+    if (!confirm(`Are you sure you want to ${action} bank details?`)) {
+      return;
+    }
+
+    this.isLoading = true;
+
+    // ✅ CORRECT: Send boolean true/false, NOT string "true"/"false"
+    const request = {
+      approved: approved, // true or false (boolean)
+      remarks: remarks,
+    };
+
+    console.log('Verify Bank Details Request:', request);
+
+    this.orgService
+      .verifyEmployeeBankDetails(this.selectedEmployee.employeeId, request)
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => (this.isLoading = false))
+      )
+      .subscribe({
+        next: (response) => {
+          this.showSuccess(`✅ Bank details ${action}d successfully`);
+          this.viewEmployeeDetails(this.selectedEmployee.employeeId);
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+          console.error(`Failed to ${action} bank details:`, error);
+          this.showError(error.error?.message || `Failed to ${action} bank details`);
+          this.cdr.detectChanges();
+        },
+      });
+  }
+  //END EMployee DETAILS
+
+  viewDocument(fileUrl: string): void {
+    if (!fileUrl) {
+      this.showError('Document URL not available');
+      return;
+    }
+    window.open(fileUrl, '_blank');
+  }
 
   // Payroll Management
   generatePayroll(month: string): void {
@@ -920,10 +969,12 @@ viewDocument(fileUrl: string): void {
       )
       .subscribe({
         next: (response) => {
+          this.isLoading = false
           this.showSuccess(response.message || '✅ Payroll generated successfully');
           this.cdr.detectChanges();
         },
         error: (error) => {
+          this.isLoading = false
           this.showError(error.error?.message || 'Failed to generate payroll');
           this.cdr.detectChanges();
         },
@@ -959,399 +1010,411 @@ viewDocument(fileUrl: string): void {
       });
   }
 
-// vendor management section
- // ========== VENDOR MANAGEMENT METHODS ==========
+  // vendor management section
+  // ========== VENDOR MANAGEMENT METHODS ==========
 
-/**
- * Load all vendors
- */
-loadVendors(): void {
-  this.orgService.getAllVendors()
-    .pipe(takeUntil(this.destroy$))
-    .subscribe({
-      next: (data) => {
-        this.vendors = data || [];
-        this.cdr.detectChanges();
-      },
-      error: (error) => {
-        console.error('Failed to load vendors', error);
-        this.showError('Failed to load vendors');
-      }
-    });
-}
+  /**
+   * Load all vendors
+   */
+  loadVendors(): void {
+    this.orgService
+      .getAllVendors()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data) => {
+          this.vendors = data || [];
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+          console.error('Failed to load vendors', error);
+          this.showError('Failed to load vendors');
+        },
+      });
+  }
 
-/**
- * Open vendor modal for create/edit
- */
-openVendorModal(vendor?: any): void {
-  this.showVendorModal = true;
-  this.selectedVendor = vendor;
-  
-  if (vendor) {
-    // Edit mode - patch form with vendor data
-    this.vendorForm.patchValue(vendor);
-  } else {
-    // Create mode - reset form
+  /**
+   * Open vendor modal for create/edit
+   */
+  openVendorModal(vendor?: any): void {
+    this.showVendorModal = true;
+    this.selectedVendor = vendor;
+
+    if (vendor) {
+      // Edit mode - patch form with vendor data
+      this.vendorForm.patchValue(vendor);
+    } else {
+      // Create mode - reset form
+      this.vendorForm.reset();
+    }
+  }
+
+  /**
+   * Close vendor modal
+   */
+  closeVendorModal(): void {
+    this.showVendorModal = false;
+    this.selectedVendor = null;
     this.vendorForm.reset();
   }
-}
 
-/**
- * Close vendor modal
- */
-closeVendorModal(): void {
-  this.showVendorModal = false;
-  this.selectedVendor = null;
-  this.vendorForm.reset();
-}
+  /**
+   * Save vendor (create or update)
+   */
+  saveVendor(): void {
+    if (this.vendorForm.invalid) {
+      this.showError('Please fill all required fields correctly');
+      return;
+    }
 
-/**
- * Save vendor (create or update)
- */
-saveVendor(): void {
-  if (this.vendorForm.invalid) {
-    this.showError('Please fill all required fields correctly');
-    return;
+    const action = this.selectedVendor ? 'update' : 'create';
+    if (!confirm(`Are you sure you want to ${action} this vendor?`)) {
+      return;
+    }
+
+    this.isLoading = true;
+    const vendorData = this.vendorForm.value;
+
+    const apiCall = this.selectedVendor
+      ? this.orgService.updateVendor(this.selectedVendor.id, vendorData)
+      : this.orgService.createVendor(vendorData);
+
+    apiCall
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => (this.isLoading = false))
+      )
+      .subscribe({
+        next: (response) => {
+          this.showSuccess(`✅ Vendor ${action}d successfully`);
+          this.closeVendorModal();
+          this.loadVendors();
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+          this.showError(error.error?.message || `Failed to ${action} vendor`);
+          this.cdr.detectChanges();
+        },
+      });
   }
 
-  const action = this.selectedVendor ? 'update' : 'create';
-  if (!confirm(`Are you sure you want to ${action} this vendor?`)) {
-    return;
+  /**
+   * View vendor details
+   */
+  viewVendorDetails(vendorId: number): void {
+    this.isLoading = true;
+    this.orgService
+      .getVendorById(vendorId)
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => (this.isLoading = false))
+      )
+      .subscribe({
+        next: (data) => {
+          this.selectedVendor = data;
+          this.showVendorDetailModal = true;
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+          this.showError('Failed to load vendor details');
+          console.error(error);
+        },
+      });
   }
 
-  this.isLoading = true;
-  const vendorData = this.vendorForm.value;
-
-  const apiCall = this.selectedVendor
-    ? this.orgService.updateVendor(this.selectedVendor.id, vendorData)
-    : this.orgService.createVendor(vendorData);
-
-  apiCall
-    .pipe(
-      takeUntil(this.destroy$),
-      finalize(() => this.isLoading = false)
-    )
-    .subscribe({
-      next: (response) => {
-        this.showSuccess(`✅ Vendor ${action}d successfully`);
-        this.closeVendorModal();
-        this.loadVendors();
-        this.cdr.detectChanges();
-      },
-      error: (error) => {
-        this.showError(error.error?.message || `Failed to ${action} vendor`);
-        this.cdr.detectChanges();
-      }
-    });
-}
-
-/**
- * View vendor details
- */
-viewVendorDetails(vendorId: number): void {
-  this.isLoading = true;
-  this.orgService.getVendorById(vendorId)
-    .pipe(
-      takeUntil(this.destroy$),
-      finalize(() => this.isLoading = false)
-    )
-    .subscribe({
-      next: (data) => {
-        this.selectedVendor = data;
-        this.showVendorDetailModal = true;
-        this.cdr.detectChanges();
-      },
-      error: (error) => {
-        this.showError('Failed to load vendor details');
-        console.error(error);
-      }
-    });
-}
-
-/**
- * Close vendor detail modal
- */
-closeVendorDetailModal(): void {
-  this.showVendorDetailModal = false;
-  this.selectedVendor = null;
-}
-
-/**
- * Delete vendor
- */
-deleteVendor(vendorId: number, vendorName: string): void {
-  if (!confirm(`Are you sure you want to delete vendor "${vendorName}"? This action cannot be undone.`)) {
-    return;
+  /**
+   * Close vendor detail modal
+   */
+  closeVendorDetailModal(): void {
+    this.showVendorDetailModal = false;
+    this.selectedVendor = null;
   }
 
-  this.isLoading = true;
-  this.orgService.deleteVendor(vendorId)
-    .pipe(
-      takeUntil(this.destroy$),
-      finalize(() => this.isLoading = false)
-    )
-    .subscribe({
-      next: () => {
-        this.showSuccess('✅ Vendor deleted successfully');
-        this.loadVendors();
-        this.cdr.detectChanges();
-      },
-      error: (error) => {
-        this.showError(error.error?.message || 'Failed to delete vendor');
-        this.cdr.detectChanges();
-      }
-    });
-}
+  /**
+   * Delete vendor
+   */
+  deleteVendor(vendorId: number, vendorName: string): void {
+    if (
+      !confirm(
+        `Are you sure you want to delete vendor "${vendorName}"? This action cannot be undone.`
+      )
+    ) {
+      return;
+    }
 
-// ========== VENDOR PAYMENT REQUEST METHODS ==========
-
-/**
- * Load vendor payment requests
- */
-loadVendorPaymentRequests(): void {
-  this.orgService.getAllVendorPaymentRequests()
-    .pipe(takeUntil(this.destroy$))
-    .subscribe({
-      next: (data) => {
-        this.vendorPaymentRequests = data || [];
-        this.cdr.detectChanges();
-      },
-      error: (error) => {
-        console.error('Failed to load payment requests', error);
-        this.showError('Failed to load payment requests');
-      }
-    });
-}
-
-/**
- * Open payment request modal
- */
-openVendorPaymentModal(): void {
-  if (this.vendors.length === 0) {
-    this.showError('Please create at least one vendor before making a payment request');
-    return;
-  }
-  
-  this.showVendorPaymentModal = true;
-  this.vendorPaymentForm.reset({ requestType: 'VENDOR' });
-}
-
-/**
- * Close payment request modal
- */
-closeVendorPaymentModal(): void {
-  this.showVendorPaymentModal = false;
-  this.vendorPaymentForm.reset();
-}
-
-/**
- * Create vendor payment request
- */
-createVendorPaymentRequest(): void {
-  if (this.vendorPaymentForm.invalid) {
-    this.showError('Please fill all required fields correctly');
-    return;
+    this.isLoading = true;
+    this.orgService
+      .deleteVendor(vendorId)
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => (this.isLoading = false))
+      )
+      .subscribe({
+        next: () => {
+          this.showSuccess('✅ Vendor deleted successfully');
+          this.loadVendors();
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+          this.showError(error.error?.message || 'Failed to delete vendor');
+          this.cdr.detectChanges();
+        },
+      });
   }
 
-  if (!confirm('Are you sure you want to create this payment request?')) {
-    return;
+  // ========== VENDOR PAYMENT REQUEST METHODS ==========
+
+  /**
+   * Load vendor payment requests
+   */
+  loadVendorPaymentRequests(): void {
+    this.orgService
+      .getAllVendorPaymentRequests()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data) => {
+          this.vendorPaymentRequests = data || [];
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+          console.error('Failed to load payment requests', error);
+          this.showError('Failed to load payment requests');
+        },
+      });
   }
 
-  this.isLoading = true;
-  const paymentData = this.vendorPaymentForm.value;
+  /**
+   * Open payment request modal
+   */
+  openVendorPaymentModal(): void {
+    if (this.vendors.length === 0) {
+      this.showError('Please create at least one vendor before making a payment request');
+      return;
+    }
 
-  this.orgService.createVendorPaymentRequest(paymentData)
-    .pipe(
-      takeUntil(this.destroy$),
-      finalize(() => this.isLoading = false)
-    )
-    .subscribe({
-      next: (response) => {
-        this.showSuccess('✅ Payment request created successfully');
-        this.closeVendorPaymentModal();
-        this.loadVendorPaymentRequests();
-        this.cdr.detectChanges();
-      },
-      error: (error) => {
-        this.showError(error.error?.message || 'Failed to create payment request');
-        this.cdr.detectChanges();
-      }
-    });
-}
-
-// * View payment request details
-
-
-viewPaymentRequestDetails(paymentRequest: any): void {
-  // Backend returns 'paymentId', not 'id'
-  const paymentId = paymentRequest.paymentId;
-  
-  if (!paymentId) {
-    console.error('Payment Request:', paymentRequest);
-    this.showError('Payment request ID is missing');
-    return;
+    this.showVendorPaymentModal = true;
+    this.vendorPaymentForm.reset({ requestType: 'VENDOR' });
   }
 
-  this.isLoading = true;
-  this.orgService.getVendorPaymentRequestById(paymentId)
-    .pipe(
-      takeUntil(this.destroy$),
-      finalize(() => this.isLoading = false)
-    )
-    .subscribe({
-      next: (data) => {
-        this.selectedPaymentRequest = data;
-        this.showPaymentDetailModal = true;
-        this.cdr.detectChanges();
-      },
-      error: (error) => {
-        this.showError('Failed to load payment request details');
-        console.error(error);
-      }
-    });
-}
-
-/**
- * Close payment detail modal
- */
-closePaymentDetailModal(): void {
-  this.showPaymentDetailModal = false;
-  this.selectedPaymentRequest = null;
-}
-//vendor methods end
-
-
-//START CONCERN VIEW
-
-// Add these methods after your existing methods
-
-viewConcern(ticketNumber: string): void {
-  this.isLoading = true;
-  this.orgService.getConcernByTicket(ticketNumber)
-    .pipe(
-      takeUntil(this.destroy$),
-      finalize(() => this.isLoading = false)
-    )
-    .subscribe({
-      next: (data) => {
-        this.selectedConcern = data;
-        this.showConcernModal = true;
-        this.concernResponseText = '';
-        this.cdr.detectChanges();
-      },
-      error: (error) => {
-        console.error('Failed to load concern details', error);
-        this.showError('Failed to load concern details');
-      }
-    });
-}
-
-closeConcernModal(): void {
-  this.showConcernModal = false;
-  this.selectedConcern = null;
-  this.concernResponseText = '';
-}
-
-respondToConcern(): void {
-  if (!this.concernResponseText || this.concernResponseText.trim() === '') {
-    this.showError('Please enter a response message');
-    return;
+  /**
+   * Close payment request modal
+   */
+  closeVendorPaymentModal(): void {
+    this.showVendorPaymentModal = false;
+    this.vendorPaymentForm.reset();
   }
 
-  if (!confirm('Are you sure you want to respond to this concern?')) {
-    return;
+  /**
+   * Create vendor payment request
+   */
+  createVendorPaymentRequest(): void {
+    if (this.vendorPaymentForm.invalid) {
+      this.showError('Please fill all required fields correctly');
+      return;
+    }
+
+    if (!confirm('Are you sure you want to create this payment request?')) {
+      return;
+    }
+
+    this.isLoading = true;
+    const paymentData = this.vendorPaymentForm.value;
+
+    this.orgService
+      .createVendorPaymentRequest(paymentData)
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => (this.isLoading = false))
+      )
+      .subscribe({
+        next: (response) => {
+          this.showSuccess('✅ Payment request created successfully');
+          this.closeVendorPaymentModal();
+          this.loadVendorPaymentRequests();
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+          this.showError(error.error?.message || 'Failed to create payment request');
+          this.cdr.detectChanges();
+        },
+      });
   }
 
-  this.isLoading = true;
-  this.orgService.respondToConcern(this.selectedConcern.ticketNumber, this.concernResponseText)
-    .pipe(
-      takeUntil(this.destroy$),
-      finalize(() => this.isLoading = false)
-    )
-    .subscribe({
-      next: (response) => {
-        this.showSuccess('✅ Response sent successfully');
-        this.closeConcernModal();
-        this.loadConcerns();
-        this.cdr.detectChanges();
-      },
-      error: (error) => {
-        this.showError(error.error?.message || 'Failed to send response');
-      }
-    });
-}
+  // * View payment request details
 
-resolveConcern(): void {
-  if (!this.concernResponseText || this.concernResponseText.trim() === '') {
-    this.showError('Please enter a resolution message');
-    return;
+  viewPaymentRequestDetails(paymentRequest: any): void {
+    // Backend returns 'paymentId', not 'id'
+    const paymentId = paymentRequest.paymentId;
+
+    if (!paymentId) {
+      console.error('Payment Request:', paymentRequest);
+      this.showError('Payment request ID is missing');
+      return;
+    }
+
+    this.isLoading = true;
+    this.orgService
+      .getVendorPaymentRequestById(paymentId)
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => (this.isLoading = false))
+      )
+      .subscribe({
+        next: (data) => {
+          this.selectedPaymentRequest = data;
+          this.showPaymentDetailModal = true;
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+          this.showError('Failed to load payment request details');
+          console.error(error);
+        },
+      });
   }
 
-  if (!confirm('Are you sure you want to mark this concern as RESOLVED?')) {
-    return;
+  /**
+   * Close payment detail modal
+   */
+  closePaymentDetailModal(): void {
+    this.showPaymentDetailModal = false;
+    this.selectedPaymentRequest = null;
+  }
+  //vendor methods end
+
+  //START CONCERN VIEW
+
+  // Add these methods after your existing methods
+
+  viewConcern(ticketNumber: string): void {
+    this.isLoading = true;
+    this.orgService
+      .getConcernByTicket(ticketNumber)
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => (this.isLoading = false))
+      )
+      .subscribe({
+        next: (data) => {
+          this.selectedConcern = data;
+          this.showConcernModal = true;
+          this.concernResponseText = '';
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+          console.error('Failed to load concern details', error);
+          this.showError('Failed to load concern details');
+        },
+      });
   }
 
-  this.isLoading = true;
-  this.orgService.resolveConcern(this.selectedConcern.ticketNumber, this.concernResponseText)
-    .pipe(
-      takeUntil(this.destroy$),
-      finalize(() => this.isLoading = false)
-    )
-    .subscribe({
-      next: (response) => {
-        this.showSuccess('✅ Concern resolved successfully');
-        this.closeConcernModal();
-        this.loadConcerns();
-        this.cdr.detectChanges();
-      },
-      error: (error) => {
-        this.showError(error.error?.message || 'Failed to resolve concern');
-      }
-    });
-}
-
-rejectConcern(): void {
-  if (!this.concernResponseText || this.concernResponseText.trim() === '') {
-    this.showError('Please enter a rejection reason');
-    return;
+  closeConcernModal(): void {
+    this.showConcernModal = false;
+    this.selectedConcern = null;
+    this.concernResponseText = '';
   }
 
-  if (!confirm('Are you sure you want to REJECT this concern?')) {
-    return;
+  respondToConcern(): void {
+    if (!this.concernResponseText || this.concernResponseText.trim() === '') {
+      this.showError('Please enter a response message');
+      return;
+    }
+
+    if (!confirm('Are you sure you want to respond to this concern?')) {
+      return;
+    }
+
+    this.isLoading = true;
+    this.orgService
+      .respondToConcern(this.selectedConcern.ticketNumber, this.concernResponseText)
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => (this.isLoading = false))
+      )
+      .subscribe({
+        next: (response) => {
+          this.showSuccess('✅ Response sent successfully');
+          this.closeConcernModal();
+          this.loadConcerns();
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+          this.showError(error.error?.message || 'Failed to send response');
+        },
+      });
   }
 
-  this.isLoading = true;
-  this.orgService.rejectConcern(this.selectedConcern.ticketNumber, this.concernResponseText)
-    .pipe(
-      takeUntil(this.destroy$),
-      finalize(() => this.isLoading = false)
-    )
-    .subscribe({
-      next: (response) => {
-        this.showSuccess('✅ Concern rejected');
-        this.closeConcernModal();
-        this.loadConcerns();
-        this.cdr.detectChanges();
-      },
-      error: (error) => {
-        this.showError(error.error?.message || 'Failed to reject concern');
-      }
-    });
-}
+  resolveConcern(): void {
+    if (!this.concernResponseText || this.concernResponseText.trim() === '') {
+      this.showError('Please enter a resolution message');
+      return;
+    }
 
-canRespondToConcern(): boolean {
-  if (!this.selectedConcern) return false;
-  const status = this.selectedConcern.status?.toUpperCase();
-  return status === 'OPEN' || status === 'IN_PROGRESS' || status === 'REOPENED';
-}
+    if (!confirm('Are you sure you want to mark this concern as RESOLVED?')) {
+      return;
+    }
 
-canResolveOrReject(): boolean {
-  if (!this.selectedConcern) return false;
-  const status = this.selectedConcern.status?.toUpperCase();
-  return status === 'OPEN' || status === 'IN_PROGRESS' || status === 'REOPENED';
-}
+    this.isLoading = true;
+    this.orgService
+      .resolveConcern(this.selectedConcern.ticketNumber, this.concernResponseText)
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => (this.isLoading = false))
+      )
+      .subscribe({
+        next: (response) => {
+          this.showSuccess('✅ Concern resolved successfully');
+          this.closeConcernModal();
+          this.loadConcerns();
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+          this.showError(error.error?.message || 'Failed to resolve concern');
+        },
+      });
+  }
 
-//END CONCERN VIEW 
+  rejectConcern(): void {
+    if (!this.concernResponseText || this.concernResponseText.trim() === '') {
+      this.showError('Please enter a rejection reason');
+      return;
+    }
+
+    if (!confirm('Are you sure you want to REJECT this concern?')) {
+      return;
+    }
+
+    this.isLoading = true;
+    this.orgService
+      .rejectConcern(this.selectedConcern.ticketNumber, this.concernResponseText)
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => (this.isLoading = false))
+      )
+      .subscribe({
+        next: (response) => {
+          this.showSuccess('✅ Concern rejected');
+          this.closeConcernModal();
+          this.loadConcerns();
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+          this.showError(error.error?.message || 'Failed to reject concern');
+        },
+      });
+  }
+
+  canRespondToConcern(): boolean {
+    if (!this.selectedConcern) return false;
+    const status = this.selectedConcern.status?.toUpperCase();
+    return status === 'OPEN' || status === 'IN_PROGRESS' || status === 'REOPENED';
+  }
+
+  canResolveOrReject(): boolean {
+    if (!this.selectedConcern) return false;
+    const status = this.selectedConcern.status?.toUpperCase();
+    return status === 'OPEN' || status === 'IN_PROGRESS' || status === 'REOPENED';
+  }
+
+  //END CONCERN VIEW
 
   // Disable upload button if documents are already uploaded or under review/approved
   isDocumentUploadDisabled(): boolean {
@@ -1372,72 +1435,76 @@ canResolveOrReject(): boolean {
       this.onboardingStatus.bankStage === 'PROVIDED'
     );
   }
- getAvailableDocumentTypes(index: number): string[] {
-  // Get all already uploaded file types from onboardingStatus
-  const uploadedTypes = (this.onboardingStatus?.documents || [])
-    .filter((doc: any) => ['APPROVED', 'UNDER_REVIEW', 'PENDING'].includes(doc.status?.toUpperCase()))
-    .map((doc: any) => doc.fileType?.toUpperCase());
+  getAvailableDocumentTypes(index: number): string[] {
+    // Get all already uploaded file types from onboardingStatus
+    const uploadedTypes = (this.onboardingStatus?.documents || [])
+      .filter((doc: any) =>
+        ['APPROVED', 'UNDER_REVIEW', 'PENDING'].includes(doc.status?.toUpperCase())
+      )
+      .map((doc: any) => doc.fileType?.toUpperCase());
 
-  // Also track selections within the current form (while open)
-  const selectedInForm = this.documentsArray.controls
-    .map(control => control.get('fileType')?.value?.toUpperCase())
-    .filter(type => !!type && type !== this.documentsArray.at(index).get('fileType')?.value?.toUpperCase());
+    // Also track selections within the current form (while open)
+    const selectedInForm = this.documentsArray.controls
+      .map((control) => control.get('fileType')?.value?.toUpperCase())
+      .filter(
+        (type) =>
+          !!type && type !== this.documentsArray.at(index).get('fileType')?.value?.toUpperCase()
+      );
 
-  //  Combine both
-  const usedTypes = [...new Set([...uploadedTypes, ...selectedInForm])];
+    //  Combine both
+    const usedTypes = [...new Set([...uploadedTypes, ...selectedInForm])];
 
-  // Return only unused document types
-  return this.allowedDocumentTypes.filter(type => !usedTypes.includes(type.toUpperCase()));
-}
+    // Return only unused document types
+    return this.allowedDocumentTypes.filter((type) => !usedTypes.includes(type.toUpperCase()));
+  }
 
-shouldBlurDocumentAction(): boolean {
-  if (!this.onboardingStatus) return false;
+  shouldBlurDocumentAction(): boolean {
+    if (!this.onboardingStatus) return false;
 
-  // Blur if any document is rejected OR all docs are uploaded
-  const docs = this.onboardingStatus.documents || [];
-  const hasRejected = docs.some((d: any) => d.status?.toUpperCase() === 'REJECTED');
+    // Blur if any document is rejected OR all docs are uploaded
+    const docs = this.onboardingStatus.documents || [];
+    const hasRejected = docs.some((d: any) => d.status?.toUpperCase() === 'REJECTED');
 
-  const uploadedTypes = docs.map((d: any) => d.fileType?.toUpperCase());
-  const allUploaded = this.allowedDocumentTypes.every(type =>
-    uploadedTypes.includes(type.toUpperCase())
-  );
+    const uploadedTypes = docs.map((d: any) => d.fileType?.toUpperCase());
+    const allUploaded = this.allowedDocumentTypes.every((type) =>
+      uploadedTypes.includes(type.toUpperCase())
+    );
 
-  return hasRejected || allUploaded;
-}
-
+    return hasRejected || allUploaded;
+  }
 
   // Utility Methods
 
   switchTab(tab: string): void {
-  // Check for onboarding completion
-  if (!this.isOnboardingComplete() && tab !== 'dashboard') {
-    this.showError('Complete your onboarding (100%) to access this feature');
-    return;
-  }
+    // Check for onboarding completion
+    if (!this.isOnboardingComplete() && tab !== 'dashboard') {
+      this.showError('Complete your onboarding (100%) to access this feature');
+      return;
+    }
 
-  // Check if organization is active
-  if (!this.isOrganizationActive() && tab !== 'dashboard') {
-    this.showError('Your organization is not active yet. Please wait for admin activation.');
-    return;
-  }
+    // Check if organization is active
+    if (!this.isOrganizationActive() && tab !== 'dashboard') {
+      this.showError('Your organization is not active yet. Please wait for admin activation.');
+      return;
+    }
 
-  this.activeTab = tab;
-  this.clearMessages();
+    this.activeTab = tab;
+    this.clearMessages();
 
-  // Load data based on active tab
-  if (tab === 'concerns') {
-    this.loadConcerns();
-  } else if (tab === 'employees') {
-    this.loadEmployees();
-  } else if (tab === 'templates') {
-    this.loadSalaryTemplates();
-  } else if (tab === 'designations') {
-    this.loadDesignations();
-  } else if (tab === 'vendors') {
-    this.loadVendors();
-    this.loadVendorPaymentRequests();
+    // Load data based on active tab
+    if (tab === 'concerns') {
+      this.loadConcerns();
+    } else if (tab === 'employees') {
+      this.loadEmployees();
+    } else if (tab === 'templates') {
+      this.loadSalaryTemplates();
+    } else if (tab === 'designations') {
+      this.loadDesignations();
+    } else if (tab === 'vendors') {
+      this.loadVendors();
+      this.loadVendorPaymentRequests();
+    }
   }
-}
 
   getProgress(): number {
     if (!this.onboardingStatus) return 0;
