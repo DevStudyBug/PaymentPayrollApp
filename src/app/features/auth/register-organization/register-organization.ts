@@ -1,5 +1,5 @@
 // register-organization.component.ts
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
@@ -23,7 +23,8 @@ export class RegisterOrganization implements OnInit {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef  
   ) {}
 
   ngOnInit(): void {
@@ -88,24 +89,33 @@ export class RegisterOrganization implements OnInit {
         const errorMsg = error.error?.message || error.error?.error || '';
         if (errorMsg.toLowerCase().includes('email')) {
           this.errorMessage = 'This email address is already registered. Please use a different email.';
+          this.cdr.detectChanges();
         } else if (errorMsg.toLowerCase().includes('username')) {
           this.errorMessage = 'This username is already taken. Please choose a different username.';
+          this.cdr.detectChanges();
         } else if (errorMsg.toLowerCase().includes('registration')) {
           this.errorMessage = 'This registration number already exists. Please check your registration number.';
+          this.cdr.detectChanges();
         } else {
           this.errorMessage = errorMsg || 'Organization already exists. Please check your email, username, or registration number.';
+          this.cdr.detectChanges();
         }
       } else if (error.status === 400) {
         this.errorMessage = error.error?.message || 'Invalid data provided. Please check all fields.';
+        this.cdr.detectChanges();
       } else if (error.status === 500) {
         this.errorMessage = 'Server error occurred. Please try again later.';
+        this.cdr.detectChanges();
       } else if (error.status === 0) {
         this.errorMessage = 'Network error. Please check your internet connection.';
+        this.cdr.detectChanges();
       } else {
         this.errorMessage = error.error?.message || 'Registration failed. Please try again.';
+        this.cdr.detectChanges();
       }
 
       console.error('Registration error:', error);
+      this.cdr.detectChanges();
     }
   );
 }

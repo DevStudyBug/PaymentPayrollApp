@@ -38,7 +38,7 @@ export class EmployeeDashboardComponent implements OnInit, OnDestroy {
   concernFile: File | null = null;
 
   // Required documents
-  requiredDocuments = ['PAN', 'AADHAR', 'PHOTO', 'RESUME'];
+  requiredDocuments = ['PAN_CARD', 'AADHAR_CARD', 'PROFILE_PHOTO'];
 
   private destroy$ = new Subject<void>();
 
@@ -89,10 +89,12 @@ export class EmployeeDashboardComponent implements OnInit, OnDestroy {
           console.log('Onboarding Status:', data);
           this.onboardingStatus = data;
           this.cdr.detectChanges(); // Ensure UI updates
+          
         },
         error: (error) => {
           console.error('Failed to load onboarding status', error);
           this.showError('Failed to load onboarding status');
+          this.cdr.detectChanges();
         }
       });
   }
@@ -112,6 +114,7 @@ export class EmployeeDashboardComponent implements OnInit, OnDestroy {
         error: (error) => {
           console.error('Failed to load concerns', error);
           this.concerns = [];
+          this.cdr.detectChanges();
         }
       });
   }
@@ -131,6 +134,7 @@ export class EmployeeDashboardComponent implements OnInit, OnDestroy {
 
     if (files.length === 0) {
       this.showError('Please select at least one document to upload');
+      this.cdr.detectChanges();
       return;
     }
 
@@ -155,6 +159,7 @@ export class EmployeeDashboardComponent implements OnInit, OnDestroy {
         error: (error) => {
           console.error('Upload failed:', error);
           this.showError(error.error?.message || 'Failed to upload documents');
+          this.cdr.detectChanges();
         }
       });
   }
@@ -182,9 +187,11 @@ export class EmployeeDashboardComponent implements OnInit, OnDestroy {
           this.showSuccess('✅ Document reuploaded successfully');
           this.loadOnboardingStatus();
            this.cdr.detectChanges();
+           console.log('Reupload response:', response);
         },
         error: (error) => {
           this.showError(error.error?.message || 'Failed to reupload document');
+          this.cdr.detectChanges();
         }
       });
   }
@@ -213,10 +220,13 @@ export class EmployeeDashboardComponent implements OnInit, OnDestroy {
           this.showSuccess('✅ Bank details submitted successfully');
           this.bankDetailsForm.reset();
           this.loadOnboardingStatus();
-           this.cdr.detectChanges();
+          this.cdr.detectChanges();
+          console.log('Bank details response:', response);
+   
         },
         error: (error) => {
           this.showError(error.error?.message || 'Failed to submit bank details');
+          this.cdr.detectChanges();
         }
       });
   }
@@ -231,6 +241,8 @@ export class EmployeeDashboardComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Failed to load bank details', error);
+          this.cdr.detectChanges();
+        
         }
       });
   }
@@ -256,6 +268,7 @@ export class EmployeeDashboardComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           this.showError(error.error?.message || 'Salary slip not found for this month');
+            this.cdr.detectChanges();
         }
       });
   }
@@ -285,6 +298,7 @@ export class EmployeeDashboardComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           this.showError('Failed to download salary slip');
+            this.cdr.detectChanges();
         }
       });
   }
@@ -322,6 +336,7 @@ export class EmployeeDashboardComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           this.showError(error.error?.message || 'Failed to raise concern');
+            this.cdr.detectChanges();
         }
       });
   }
@@ -341,6 +356,7 @@ export class EmployeeDashboardComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           this.showError(error.error?.message || 'Failed to close concern');
+            this.cdr.detectChanges();
         }
       });
   }
@@ -359,6 +375,7 @@ export class EmployeeDashboardComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           this.showError(error.error?.message || 'Failed to reopen concern');
+            this.cdr.detectChanges();
         }
       });
   }

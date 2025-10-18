@@ -193,10 +193,28 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   }
 
   // Check if all documents are approved
-  areAllDocumentsApproved(org: BankAdminOrgRegisterResponse | null): boolean {
-    if (!org || !org.documents || org.documents.length === 0) return false;
-    return org.documents.every(doc => doc.status === 'APPROVED');
+  //areAllDocumentsApproved(org: BankAdminOrgRegisterResponse | null): boolean {
+    //if (!org || !org.documents || org.documents.length === 0) return false;
+    //return org.documents.every(doc => doc.status === 'APPROVED');
+  //}
+
+  // Check if all documents are approved
+areAllDocumentsApproved(org: BankAdminOrgRegisterResponse | null): boolean {
+  if (!org || !org.documents || org.documents.length === 0) {
+    return false;
   }
+  
+  // Required document types
+  const requiredDocs = ['PAN', 'GST', 'LICENSE'];
+  
+  // Get approved document types (convert to uppercase for case-insensitive comparison)
+  const approvedDocTypes = org.documents
+    .filter(doc => doc.status === 'APPROVED')
+    .map(doc => doc.fileType.toUpperCase());
+  
+  // Check if all 3 required documents are approved
+  return requiredDocs.every(reqDoc => approvedDocTypes.includes(reqDoc));
+}
 
   // Check if organization can be verified (documents + bank approved)
   canVerifyOrganization(org: BankAdminOrgRegisterResponse | null): boolean {
@@ -221,6 +239,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
           this.showAlert('✅ Organization verified successfully!');
           this.fetchAllOrganizations();
           this.selectedOrganization = null;
+          this.cdr.detectChanges();
         },
         error: (err) => {
           console.error(err);

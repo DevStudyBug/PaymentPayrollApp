@@ -25,28 +25,35 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
                         (req.url.includes('http://') && !req.url.includes('localhost')) ||
                         (req.url.includes('https://') && !req.url.includes('localhost'));
 
-  // Clone request and add Authorization header
   if (token && !isExternalUrl && !isPublicEndpoint) {
-    // Don't override Content-Type if it's multipart/form-data (for file uploads)
-    const headers: any = {
-      Authorization: `Bearer ${token}`
-    };
-
-    // Only set Content-Type for non-file uploads
-    if (!req.headers.has('Content-Type') && !(req.body instanceof FormData)) {
-      headers['Content-Type'] = 'application/json';
-    }
-
-    req = req.clone({
-      setHeaders: headers
-    });
-
-    console.log('Request with token:', {
-      url: req.url,
-      hasToken: !!token,
-      headers: req.headers.keys()
-    });
+  // Check if token is expired before sending the request
+  if (authService.isTokenExpired()) {
+    console.warn('Token expired. Logging out user...');
+    authService.logout();
+    router.navigate(['/login']);
+    return throwError(() => new Error('Token expired'));
   }
+
+  // Don't override Content-Type if it's multipart/form-data (for file uploads)
+  const headers: any = {
+    Authorization: `Bearer ${token}`
+  };
+
+  if (!req.headers.has('Content-Type') && !(req.body instanceof FormData)) {
+    headers['Content-Type'] = 'application/json';
+  }
+
+  req = req.clone({
+    setHeaders: headers
+  });
+
+  console.log('Request with token:', {
+    url: req.url,
+    hasToken: !!token,
+    headers: req.headers.keys()
+  });
+}
+
 
   // Handle response and errors
   return next(req).pipe(
@@ -74,4 +81,5 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
       return throwError(() => error);
     })
   );
+  
 };

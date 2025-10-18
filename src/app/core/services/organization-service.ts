@@ -209,4 +209,75 @@ export class OrganizationService {
       headers: this.getHeaders()
     });
   }
+
+// ========== VENDOR MANAGEMENT METHODS ==========
+
+//Create a new vendor*/
+createVendor(vendor: any): Observable<any> {
+  return this.http.post(`${this.apiUrl}/vendors`, vendor, {
+    headers: this.getHeaders()
+  });
+}
+
+// Get all vendors
+getAllVendors(): Observable<any[]> {
+  return this.http.get<any[]>(`${this.apiUrl}/vendors`, {
+    headers: this.getHeaders()
+  });
+}
+
+// Get vendor by ID
+
+getVendorById(vendorId: number): Observable<any> {
+  return this.http.get(`${this.apiUrl}/vendors/${vendorId}`, {
+    headers: this.getHeaders()
+  });
+}
+
+
+ //Update vendor
+
+updateVendor(vendorId: number, vendor: any): Observable<any> {
+  return this.http.put(`${this.apiUrl}/vendors/${vendorId}`, vendor, {
+    headers: this.getHeaders()
+  });
+}
+
+// Delete vendor
+
+deleteVendor(vendorId: number): Observable<any> {
+  return this.http.delete(`${this.apiUrl}/vendors/${vendorId}`, {
+    headers: this.getHeaders()
+  });
+}
+
+// ========== VENDOR PAYMENT REQUEST METHODS ==========
+
+/**
+ * Create vendor payment request
+ */
+createVendorPaymentRequest(request: any): Observable<any> {
+  return this.http.post(`${this.apiUrl}/vendors/payment-requests`, request, {
+    headers: this.getHeaders()
+  });
+}
+
+/**
+ * Get all vendor payment requests
+ */
+getAllVendorPaymentRequests(): Observable<any[]> {
+  return this.http.get<any[]>(`${this.apiUrl}/vendors/payment-requests`, {
+    headers: this.getHeaders()
+  });
+}
+
+/**
+ * Get vendor payment request by ID
+ */
+getVendorPaymentRequestById(id: number): Observable<any> {
+  return this.http.get(`${this.apiUrl}/vendors/payment-requests/${id}`, {
+    headers: this.getHeaders()
+  });
+}
+
 }

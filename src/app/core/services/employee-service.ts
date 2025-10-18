@@ -46,7 +46,7 @@ export class EmployeeService {
     docTypes.forEach(type => formData.append('docTypes', type));
     
     return this.http.post(`${this.apiUrl}/document/uploads`, formData, {
-      headers: this.getHeadersForFormData()
+     headers: this.getHeadersForFormData()
     });
   }
 
@@ -111,8 +111,7 @@ export class EmployeeService {
     formData.append('data', JSON.stringify(concernData));
     if (file) {
       formData.append('file', file);
-    }
-    
+    } 
     return this.http.post(`${this.apiUrl}/concerns`, formData, {
       headers: this.getHeadersForFormData()
     });

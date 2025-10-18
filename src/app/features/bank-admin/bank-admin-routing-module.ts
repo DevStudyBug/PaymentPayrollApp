@@ -9,13 +9,9 @@ import { AdminDashboardComponent } from './admin-dashboard-component/admin-dashb
 const routes: Routes = [
 
   {
-
     path: '',
-
     component: AdminDashboardComponent,
-
     data: { title: 'Bank Admin Dashboard' }
-
   }
 
 ];
@@ -30,11 +26,6 @@ const routes: Routes = [
 
 export class BankAdminRoutingModule { }
 
-// ===========================
-
-// ALTERNATIVE: Feature Routes
-
-// ===========================
 
 export const BANK_ADMIN_ROUTES: Routes = [
 

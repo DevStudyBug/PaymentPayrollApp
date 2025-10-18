@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { RecaptchaModule } from 'ng-recaptcha';
@@ -24,7 +24,8 @@ export class LoginComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef 
   ) {
     this.loginForm = this.fb.group({
       userName: ['', [Validators.required, Validators.minLength(3)]],
@@ -46,6 +47,7 @@ onCaptchaResolved(token: string | null): void {
     this.captchaResponse = token;
     this.captchaError = '';
     this.loginForm.patchValue({ recaptcha: token });
+     this.cdr.detectChanges();
   } else {
     this.captchaResponse = null;
   }
@@ -81,6 +83,7 @@ onCaptchaResolved(token: string | null): void {
         if (response.orgStatus === 'PENDING') {
           this.errorMessage = 'Your organization is pending verification. Please wait for admin approval.';
           this.authService.logout();
+          this.cdr.detectChanges();
           return;
         }
 
@@ -94,7 +97,8 @@ onCaptchaResolved(token: string | null): void {
       },
       error: (err) => {
         this.isLoading = false;
-        this.errorMessage = err.error?.message || 'Invalid username or password!';
+        this.errorMessage = err.error?.error || err.error?.message || 'Invalid username or password!';
+        this.cdr.detectChanges();
       }
     });
   }

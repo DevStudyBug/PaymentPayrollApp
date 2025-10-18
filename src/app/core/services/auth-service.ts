@@ -1,17 +1,17 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject } from 'rxjs';  //handling asynchronous data and state changes
-import { tap } from 'rxjs/operators';  //saving token
+import { Observable, BehaviorSubject } from 'rxjs'; //handling asynchronous data and state changes
+import { tap } from 'rxjs/operators'; //saving token
 import { LoginRequest, LoginResponse, UserInfo } from '../models/auth.models';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
   private apiUrl = 'http://localhost:8080/api/v1/auth'; // API URL
   private tokenKey = 'auth_token';
   private userInfoKey = 'user_info';
-  
+
   // Observable to track authentication state
   private currentUserSubject = new BehaviorSubject<UserInfo | null>(this.getUserInfo());
   public currentUser$ = this.currentUserSubject.asObservable();
@@ -19,26 +19,25 @@ export class AuthService {
   constructor(private http: HttpClient) {}
 
   login(credentials: LoginRequest): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${this.apiUrl}/login`, credentials)
-      .pipe(
-        tap(response => {
-          // Store token and user info
-          if (response.token) {
-            this.setToken(response.token);
-            this.setUserInfo({
-              userId: response.userId,
-              email: response.email,
-              roles: response.roles,
-              orgStatus: response.orgStatus
-            });
-          }
-        })
-      );
+    return this.http.post<LoginResponse>(`${this.apiUrl}/login`, credentials).pipe(
+      tap((response) => {
+        // Store token and user info
+        if (response.token) {
+          this.setToken(response.token);
+          this.setUserInfo({
+            userId: response.userId,
+            email: response.email,
+            roles: response.roles,
+            orgStatus: response.orgStatus,
+          });
+        }
+      })
+    );
   }
-//organization
+  //organization
   registerOrganization(formData: any): Observable<any> {
-  return this.http.post(`${this.apiUrl}/org-register`, formData);
-}
+    return this.http.post(`${this.apiUrl}/org-register`, formData);
+  }
 
   setToken(token: string): void {
     localStorage.setItem(this.tokenKey, token);
@@ -82,7 +81,7 @@ export class AuthService {
     return !!this.getToken();
   }
 
-   // Register employee (for org admin)
+  // Register employee (for org admin)
   registerEmployee(authentication: any, request: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/register-employee`, request);
   }
@@ -92,5 +91,29 @@ export class AuthService {
     const formData = new FormData();
     formData.append('file', file);
     return this.http.post(`${this.apiUrl}/bulk-register-employees`, formData);
+  }
+  
+  //  Decode JWT payload safely
+  private decodeToken(token: string): any {
+    try {
+      const payload = token.split('.')[1];
+      const decoded = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
+      return JSON.parse(decoded);
+    } catch (error) {
+      console.error('Failed to decode token:', error);
+      return null;
+    }
+  }
+
+  //  Check if token is expired
+  isTokenExpired(): boolean {
+    const token = this.getToken();
+    if (!token) return true;
+
+    const decoded = this.decodeToken(token);
+    if (!decoded?.exp) return true;
+
+    const expiryTime = decoded.exp * 1000; // convert seconds → ms
+    return Date.now() > expiryTime;
   }
 }

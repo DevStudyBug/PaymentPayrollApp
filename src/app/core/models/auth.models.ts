@@ -18,4 +18,5 @@ export interface UserInfo {
   email: string;
   roles: string[];
   orgStatus: 'PENDING' | 'VERIFIED';
+  
 }
