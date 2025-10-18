@@ -1,0 +1,119 @@
+<!-- Navigation -->
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="logo">
+      <div class="logo-icon">$</div>
+      <span class="logo-text">PayFlow</span>
+    </div>
+    <div class="menu desktop-menu">
+      <a (click)="scrollToSection('home')">Home</a>
+      <a (click)="scrollToSection('features')">Features</a>
+      <button class="btn-login" (click)="navigateToLogin()">Login</button>
+      <button class="btn-register" (click)="navigateToRegister()">Register</button>
+    </div>
+    <button class="mobile-menu-btn" (click)="toggleMobileMenu()">
+      <span *ngIf="!mobileMenuOpen">&#9776;</span>
+      <span *ngIf="mobileMenuOpen">&times;</span>
+    </button>
+  </div>
+  
+  <!-- Mobile Menu -->
+  <div *ngIf="mobileMenuOpen" class="mobile-menu">
+    <a (click)="scrollToSection('home')">Home</a>
+    <a (click)="scrollToSection('features')">Features</a>
+    <button class="btn-login" (click)="navigateToLogin()">Login</button>
+    <button class="btn-register" (click)="navigateToRegister()">Register</button>
+  </div>
+</nav>
+
+<!-- Hero Section -->
+<section id="home" class="hero">
+  <div class="hero-content">
+    <h1>
+      Streamline Your
+      <span class="highlight">Payment & Payroll</span>
+    </h1>
+    <p class="hero-subtitle">
+      Secure, efficient, and transparent payroll management system for organizations, employees, and banks
+    </p>
+    
+    <!-- Role Selection -->
+    <div class="role-selection">
+      <div class="role-buttons">
+        <button 
+          class="role-btn" 
+          [class.active]="selectedRole === 'organization'"
+          (click)="selectRole('organization')">
+          Organization
+        </button>
+        <button 
+          class="role-btn" 
+          [class.active]="selectedRole === 'employee'"
+          (click)="selectRole('employee')">
+          Employee
+        </button>
+        <button 
+          class="role-btn" 
+          [class.active]="selectedRole === 'bank'"
+          (click)="selectRole('bank')">
+          Bank Admin
+        </button>
+      </div>
+      
+      <!-- Role Content Display -->
+      <div class="role-content" *ngIf="currentRoleContent">
+        <h3>{{ currentRoleContent.title }}</h3>
+        <ul class="feature-list">
+          <li *ngFor="let feature of currentRoleContent.features">
+            <span class="feature-icon">✓</span>
+            {{ feature }}
+          </li>
+        </ul>
+        <button class="action-btn" (click)="handleAction()">
+          {{ getActionButtonText() }}
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features Section -->
+<section id="features" class="features">
+  <div class="features-container">
+    <h2 class="section-title">Powerful Features</h2>
+    <p class="section-subtitle">Everything you need for comprehensive payroll and payment management</p>
+    
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🔒</div>
+        <h3>Secure & Compliant</h3>
+        <p>JWT authentication, BCrypt encryption, and CAPTCHA protection ensure your data stays safe</p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">👥</div>
+        <h3>Multi-Role Support</h3>
+        <p>Dedicated portals for banks, organizations, and employees with role-based access control</p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <h3>Advanced Reporting</h3>
+        <p>Generate detailed reports in PDF and Excel with customizable filters and date ranges</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="footer-content">
+    <div class="footer-logo">
+      <div class="footer-icon">$</div>
+      <span class="footer-text">PayFlow</span>
+    </div>
+    <p class="footer-copyright">© 2025 PayFlow Management System. All rights reserved.</p>
+    <p class="footer-subtext">Prepared by Anshika and Nihal Team | Version 1.1</p>
+  </div>
+</footer>
+

@@ -1,0 +1,212 @@
+<div class="register-wrapper">
+  <div class="register-container">
+    <!-- Logo -->
+    <div class="register-logo">
+      <div class="register-logo-icon">$</div>
+      <span class="register-logo-text">PayFlow</span>
+    </div>
+
+    <!-- Header -->
+    <div class="register-header">
+      <h2>Create Organization Account</h2>
+      <p>Register your organization to get started</p>
+    </div>
+
+    <!-- Registration Form -->
+    <form [formGroup]="registrationForm" (ngSubmit)="onSubmit()">
+      
+      <!-- Organization Name -->
+      <div class="form-group">
+        <label for="orgName">Organization Name <span class="required">*</span></label>
+        <div class="input-wrapper">
+          <input 
+            type="text" 
+            id="orgName" 
+            formControlName="orgName"
+            placeholder="Enter organization name"
+            autocomplete="organization"
+            [class.invalid]="isFieldInvalid('orgName')"
+          />
+          <span class="input-icon">🏢</span>
+        </div>
+        <div *ngIf="isFieldInvalid('orgName')" class="error-text">
+          {{ getErrorMessage('orgName') }}
+        </div>
+      </div>
+
+      <!-- Registration Number -->
+      <div class="form-group">
+        <label for="registrationNo">Registration Number <span class="required">*</span></label>
+        <div class="input-wrapper">
+          <input 
+            type="text" 
+            id="registrationNo" 
+            formControlName="registrationNo"
+            placeholder="Enter registration number"
+            autocomplete="off"
+            [class.invalid]="isFieldInvalid('registrationNo')"
+          />
+          <span class="input-icon">📋</span>
+        </div>
+        <div *ngIf="isFieldInvalid('registrationNo')" class="error-text">
+          {{ getErrorMessage('registrationNo') }}
+        </div>
+      </div>
+
+      <!-- Address -->
+      <div class="form-group">
+        <label for="address">Address <span class="required">*</span></label>
+        <div class="input-wrapper">
+          <textarea 
+            id="address" 
+            formControlName="address"
+            placeholder="Enter organization address"
+            rows="3"
+            autocomplete="street-address"
+            [class.invalid]="isFieldInvalid('address')"
+          ></textarea>
+          <span class="input-icon textarea-icon">📍</span>
+        </div>
+        <div *ngIf="isFieldInvalid('address')" class="error-text">
+          {{ getErrorMessage('address') }}
+        </div>
+      </div>
+
+      <!-- Contact Number and Email in Row -->
+      <div class="form-row">
+        <div class="form-group form-group-half">
+          <label for="contactNo">Contact Number <span class="required">*</span></label>
+          <div class="input-wrapper">
+            <input 
+              type="tel" 
+              id="contactNo" 
+              formControlName="contactNo"
+              placeholder="10-digit number"
+              autocomplete="tel"
+              [class.invalid]="isFieldInvalid('contactNo')"
+            />
+            <span class="input-icon">📞</span>
+          </div>
+          <div *ngIf="isFieldInvalid('contactNo')" class="error-text">
+            {{ getErrorMessage('contactNo') }}
+          </div>
+        </div>
+
+        <div class="form-group form-group-half">
+          <label for="email">Email Address <span class="required">*</span></label>
+          <div class="input-wrapper">
+            <input 
+              type="email" 
+              id="email" 
+              formControlName="email"
+              placeholder="your@email.com"
+              autocomplete="email"
+              [class.invalid]="isFieldInvalid('email')"
+            />
+            <span class="input-icon">📧</span>
+          </div>
+          <div *ngIf="isFieldInvalid('email')" class="error-text">
+            {{ getErrorMessage('email') }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Divider -->
+      <div class="divider">
+        <span>Account Credentials</span>
+      </div>
+
+      <!-- Username -->
+      <div class="form-group">
+        <label for="username">Username <span class="required">*</span></label>
+        <div class="input-wrapper">
+          <input 
+            type="text" 
+            id="username" 
+            formControlName="username"
+            placeholder="Choose a username"
+            autocomplete="username"
+            [class.invalid]="isFieldInvalid('username')"
+          />
+          <span class="input-icon">👤</span>
+        </div>
+        <div *ngIf="isFieldInvalid('username')" class="error-text">
+          {{ getErrorMessage('username') }}
+        </div>
+      </div>
+
+      <!-- Password and Confirm Password in Row -->
+      <div class="form-row">
+        <div class="form-group form-group-half">
+          <label for="password">Password <span class="required">*</span></label>
+          <div class="input-wrapper">
+            <input 
+              [type]="showPassword ? 'text' : 'password'" 
+              id="password" 
+              formControlName="password"
+              placeholder="Min. 8 characters"
+              autocomplete="new-password"
+              [class.invalid]="isFieldInvalid('password')"
+            />
+            <span class="input-icon">🔒</span>
+            <span class="password-toggle" (click)="togglePasswordVisibility()">
+              {{ showPassword ? '👁️' : '👁️‍🗨️' }}
+            </span>
+          </div>
+          <div *ngIf="isFieldInvalid('password')" class="error-text">
+            {{ getErrorMessage('password') }}
+          </div>
+        </div>
+
+        <div class="form-group form-group-half">
+          <label for="confirmPassword">Confirm Password <span class="required">*</span></label>
+          <div class="input-wrapper">
+            <input 
+              [type]="showPassword ? 'text' : 'password'" 
+              id="confirmPassword" 
+              formControlName="confirmPassword"
+              placeholder="Repeat password"
+              autocomplete="new-password"
+              [class.invalid]="isFieldInvalid('confirmPassword')"
+            />
+            <span class="input-icon">🔒</span>
+          </div>
+          <div *ngIf="isFieldInvalid('confirmPassword')" class="error-text">
+            {{ getErrorMessage('confirmPassword') }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Password Mismatch Error -->
+      <div *ngIf="passwordMismatch" class="error">
+        Passwords do not match
+      </div>
+
+      <!-- Server Error Message -->
+      <div *ngIf="errorMessage" class="error">
+        {{ errorMessage }}
+      </div>
+
+      <!-- Success Message -->
+      <div *ngIf="successMessage" class="success-message">
+        {{ successMessage }}
+      </div>
+
+      <!-- Submit Button -->
+      <button 
+        type="submit" 
+        [disabled]="registrationForm.invalid || isLoading"
+        [class.loading]="isLoading">
+        {{ isLoading ? 'Registering...' : 'Register Organization' }}
+      </button>
+
+      <!-- Additional Links -->
+      <div class="form-footer">
+        <p class="login-link">
+          Already have an account? 
+          <a routerLink="/login">Sign in here</a>
+        </p>
+      </div>
+    </form>
+  </div>
+</div>

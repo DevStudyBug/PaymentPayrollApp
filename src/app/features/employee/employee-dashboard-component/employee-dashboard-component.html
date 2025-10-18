@@ -1,0 +1,424 @@
+
+<!-- employee-dashboard.component.html -->
+<div class="employee-wrapper">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <span class="logo-icon">👤</span>
+        <span class="logo-text">Employee</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <button class="nav-item" [class.active]="activeTab === 'dashboard'" (click)="switchTab('dashboard')">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-label">Dashboard</span>
+      </button>
+
+      <button class="nav-item" [class.active]="activeTab === 'documents'" (click)="switchTab('documents')">
+        <span class="nav-icon">📄</span>
+        <span class="nav-label">Documents</span>
+      </button>
+
+      <button class="nav-item" [class.active]="activeTab === 'bank'" (click)="switchTab('bank')">
+        <span class="nav-icon">🏦</span>
+        <span class="nav-label">Bank Details</span>
+      </button>
+
+      <button class="nav-item" [class.active]="activeTab === 'salary'" (click)="switchTab('salary')">
+        <span class="nav-icon">💰</span>
+        <span class="nav-label">Salary Slips</span>
+      </button>
+
+      <button class="nav-item" [class.active]="activeTab === 'concerns'" (click)="switchTab('concerns')">
+        <span class="nav-icon">🎫</span>
+        <span class="nav-label">My Concerns</span>
+      </button>
+
+      <button class="nav-item logout-btn" (click)="logout()">
+        <span class="nav-icon">🚪</span>
+        <span class="nav-label">Logout</span>
+      </button>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Header -->
+    <header class="page-header">
+      <h1>Employee Dashboard</h1>
+      <div class="header-actions">
+        <span class="user-info">{{ onboardingStatus?.name || 'Employee' }}</span>
+      </div>
+    </header>
+
+    <!-- Messages -->
+    <div *ngIf="successMessage" class="alert alert-success">
+      <span class="alert-icon">✓</span>
+      {{ successMessage }}
+      <button class="close-btn" (click)="successMessage = ''">×</button>
+    </div>
+
+    <div *ngIf="errorMessage" class="alert alert-error">
+      <span class="alert-icon">✕</span>
+      {{ errorMessage }}
+      <button class="close-btn" (click)="errorMessage = ''">×</button>
+    </div>
+
+    <!-- Dashboard Tab -->
+    <section *ngIf="activeTab === 'dashboard'" class="content-section">
+      <h2>Onboarding Progress</h2>
+
+      <div class="dashboard-grid">
+        <!-- Progress Card -->
+        <div class="card progress-card">
+          <h3>Overall Progress</h3>
+          <div class="progress-container">
+            <div class="progress-bar">
+              <div class="progress-fill" [style.width.%]="getProgress()"></div>
+            </div>
+            <span class="progress-text">{{ getProgress() }}% Complete</span>
+          </div>
+        </div>
+
+        <!-- Status Card -->
+        <div class="card status-card">
+          <h3>Onboarding Status</h3>
+          <div class="status-badge" [ngClass]="onboardingStatus?.status?.toLowerCase()">
+            {{ onboardingStatus?.status || 'PENDING' }}
+          </div>
+          <p class="status-message">{{ onboardingStatus?.statusMessage }}</p>
+        </div>
+
+        <!-- Documents Card -->
+        <div class="card">
+          <h3>Documents</h3>
+          <div class="status-items">
+            <div class="status-item">
+              <span class="label">Approved:</span>
+              <span class="value">{{ onboardingStatus?.approvedDocuments || 0 }}</span>
+            </div>
+            <div class="status-item">
+              <span class="label">Pending:</span>
+              <span class="value">{{ onboardingStatus?.pendingDocuments || 0 }}</span>
+            </div>
+            <div class="status-item">
+              <span class="label">Rejected:</span>
+              <span class="value text-danger">{{ onboardingStatus?.rejectedDocuments || 0 }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bank Status Card -->
+        <div class="card">
+          <h3>Bank Account</h3>
+          <div class="status-items">
+            <div class="status-item">
+              <span class="label">Status:</span>
+              <span class="value">{{ onboardingStatus?.bankStatus || 'NOT_SUBMITTED' }}</span>
+            </div>
+            <div class="status-item">
+              <span class="label">Submitted:</span>
+              <span class="value">{{ onboardingStatus?.bankDetailsSubmitted ? 'Yes' : 'No' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Next Steps -->
+      <div *ngIf="onboardingStatus?.nextSteps && onboardingStatus.nextSteps.length > 0" class="card mt-20">
+        <h3>Next Steps</h3>
+        <div class="next-steps">
+          <div *ngFor="let step of onboardingStatus.nextSteps" class="step-item" [ngClass]="step.priority?.toLowerCase()">
+            <div class="step-priority">{{ step.priority }}</div>
+            <div class="step-content">
+              <h4>{{ step.action }}</h4>
+              <p>{{ step.description }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Documents Tab -->
+    <section *ngIf="activeTab === 'documents'" class="content-section">
+      <h2>Upload Documents</h2>
+
+      <!-- Upload Form -->
+      <div class="card">
+        <h3>Upload Required Documents</h3>
+        <div class="upload-grid">
+          <div *ngFor="let docType of requiredDocuments" class="upload-item">
+            <label class="upload-label">
+              <span class="doc-type">{{ docType }}</span>
+              <input type="file" (change)="onDocumentSelect($event, docType)" accept=".pdf,.jpg,.jpeg,.png">
+              <span class="file-name" *ngIf="selectedDocFiles[docType]">
+                {{ selectedDocFiles[docType].name }}
+              </span>
+            </label>
+          </div>
+        </div>
+        <button class="btn btn-primary mt-20" (click)="uploadDocuments()" [disabled]="isLoading">
+          {{ isLoading ? 'Uploading...' : 'Upload Documents' }}
+        </button>
+      </div>
+
+      <!-- Missing Documents -->
+      <div *ngIf="onboardingStatus?.missingDocuments && onboardingStatus.missingDocuments.length > 0" class="card mt-20">
+        <h3>Missing Documents</h3>
+        <div class="missing-docs">
+          <span *ngFor="let doc of onboardingStatus.missingDocuments" class="badge badge-warning">
+            {{ doc }}
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Bank Details Tab -->
+    <section *ngIf="activeTab === 'bank'" class="content-section">
+      <h2>Bank Account Details</h2>
+
+      <!-- View Bank Details -->
+      <div *ngIf="bankDetails" class="card mb-20">
+        <h3>Current Bank Details</h3>
+        <div class="bank-details-grid">
+          <div class="bank-detail-item">
+            <label>Account Holder</label>
+            <span>{{ bankDetails.accountHolderName }}</span>
+          </div>
+          <div class="bank-detail-item">
+            <label>Account Number</label>
+            <span>{{ bankDetails.accountNumber }}</span>
+          </div>
+          <div class="bank-detail-item">
+            <label>IFSC Code</label>
+            <span>{{ bankDetails.ifscCode }}</span>
+          </div>
+          <div class="bank-detail-item">
+            <label>Bank Name</label>
+            <span>{{ bankDetails.bankName }}</span>
+          </div>
+          <div class="bank-detail-item">
+            <label>Status</label>
+            <span class="status-badge" [ngClass]="bankDetails.verificationStatus?.toLowerCase()">
+              {{ bankDetails.verificationStatus }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add/Update Form -->
+      <div class="card">
+        <h3>{{ bankDetails ? 'Update' : 'Add' }} Bank Details</h3>
+        <form [formGroup]="bankDetailsForm" (ngSubmit)="submitBankDetails()">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Account Holder Name</label>
+              <input type="text" formControlName="accountHolderName" class="form-input" placeholder="Full Name">
+            </div>
+            <div class="form-group">
+              <label>Account Number</label>
+              <input type="text" formControlName="accountNumber" class="form-input" placeholder="Account Number">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>IFSC Code</label>
+              <input type="text" formControlName="ifscCode" class="form-input" placeholder="HDFC0001234">
+            </div>
+            <div class="form-group">
+              <label>Bank Name</label>
+              <input type="text" formControlName="bankName" class="form-input" placeholder="Bank Name">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Branch Name</label>
+              <input type="text" formControlName="branchName" class="form-input" placeholder="Branch Name">
+            </div>
+            <div class="form-group">
+              <label>Account Type</label>
+              <select formControlName="accountType" class="form-input">
+                <option value="SAVINGS">Savings</option>
+                <option value="CURRENT">Current</option>
+              </select>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary" [disabled]="isLoading || bankDetailsForm.invalid">
+            {{ isLoading ? 'Submitting...' : 'Submit Bank Details' }}
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- Salary Slips Tab -->
+    <section *ngIf="activeTab === 'salary'" class="content-section">
+      <h2>Salary Slips</h2>
+
+      <div class="card">
+        <h3>View Salary Slip</h3>
+        <div class="form-group">
+          <label>Select Month</label>
+          <input type="month" #monthInput class="form-input" style="max-width: 300px;">
+        </div>
+        <div class="button-group">
+          <button class="btn btn-primary" (click)="viewSalarySlip(monthInput.value)" [disabled]="isLoading">
+            View Slip
+          </button>
+          <button class="btn btn-success" (click)="downloadSalarySlip(monthInput.value)" [disabled]="isLoading">
+            Download PDF
+          </button>
+        </div>
+      </div>
+
+      <!-- Salary Slip Display -->
+      <div *ngIf="salarySlip" class="card mt-20">
+        <h3>Salary Slip - {{ salarySlip.salaryMonth }}</h3>
+        <div class="salary-details">
+          <div class="salary-row">
+            <span>Employee:</span>
+            <strong>{{ salarySlip.employeeName }}</strong>
+          </div>
+          <div class="salary-row">
+            <span>Department:</span>
+            <strong>{{ salarySlip.department }}</strong>
+          </div>
+          <div class="salary-row">
+            <span>Designation:</span>
+            <strong>{{ salarySlip.designation }}</strong>
+          </div>
+          <div class="salary-row">
+            <span>Basic Salary:</span>
+            <strong>₹{{ salarySlip.basicSalary | number:'1.2-2' }}</strong>
+          </div>
+          <div class="salary-row">
+            <span>HRA:</span>
+            <strong>₹{{ salarySlip.hra | number:'1.2-2' }}</strong>
+          </div>
+          <div class="salary-row">
+            <span>Allowances:</span>
+            <strong>₹{{ salarySlip.allowances | number:'1.2-2' }}</strong>
+          </div>
+          <div class="salary-row">
+            <span>Deductions:</span>
+            <strong class="text-danger">₹{{ salarySlip.deductions | number:'1.2-2' }}</strong>
+          </div>
+          <div class="salary-row total">
+            <span>Net Salary:</span>
+            <strong>₹{{ salarySlip.netSalary | number:'1.2-2' }}</strong>
+          </div>
+          <div class="salary-row">
+            <span>Status:</span>
+            <span class="status-badge" [ngClass]="salarySlip.status?.toLowerCase()">{{ salarySlip.status }}</span>
+          </div>
+          <div class="salary-row" *ngIf="salarySlip.paymentRefNo">
+            <span>Payment Ref:</span>
+            <strong>{{ salarySlip.paymentRefNo }}</strong>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Concerns Tab -->
+    <section *ngIf="activeTab === 'concerns'" class="content-section">
+      <h2>My Support Concerns</h2>
+
+      <!-- Raise Concern Form -->
+      <div class="card">
+        <h3>Raise New Concern</h3>
+        <form [formGroup]="concernForm" (ngSubmit)="raiseConcern()">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Category</label>
+              <select formControlName="category" class="form-input">
+                <option value="">Select Category</option>
+                <option value="SALARY">Salary</option>
+                <option value="LEAVE">Leave</option>
+                <option value="DOCUMENTS">Documents</option>
+                <option value="TECHNICAL">Technical</option>
+                <option value="OTHER">Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Priority</label>
+              <select formControlName="priority" class="form-input">
+                <option value="LOW">Low</option>
+                <option value="MEDIUM">Medium</option>
+                <option value="HIGH">High</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Description</label>
+            <textarea formControlName="description" class="form-input" rows="4" placeholder="Describe your concern..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Attachment (Optional)</label>
+            <input type="file" (change)="onConcernFileSelect($event)" class="form-input" accept=".pdf,.jpg,.jpeg,.png">
+          </div>
+
+          <button type="submit" class="btn btn-primary" [disabled]="isLoading || concernForm.invalid">
+            {{ isLoading ? 'Submitting...' : 'Raise Concern' }}
+          </button>
+        </form>
+      </div>
+
+      <!-- My Concerns List -->
+      <div class="card mt-20">
+        <h3>My Concerns</h3>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Ticket #</th>
+                <th>Category</th>
+                <th>Priority</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngIf="concerns.length === 0">
+                <td colspan="6" class="no-data">No concerns raised yet</td>
+              </tr>
+              <tr *ngFor="let concern of concerns">
+                <td>{{ concern.ticketNumber }}</td>
+                <td>{{ concern.category }}</td>
+                <td>
+                  <span class="badge" [ngClass]="concern.priority?.toLowerCase()">
+                    {{ concern.priority }}
+                  </span>
+                </td>
+                <td>
+                  <span class="status-badge" [ngClass]="concern.status?.toLowerCase()">
+                    {{ concern.status }}
+                  </span>
+                </td>
+                <td>{{ concern.createdAt | date:'short' }}</td>
+                <td>
+                  <button *ngIf="concern.status === 'RESOLVED' || concern.status === 'REJECTED'" 
+                          class="btn btn-sm btn-success" 
+                          (click)="acknowledgeConcern(concern.ticketNumber)">
+                    Close
+                  </button>
+                  <button *ngIf="concern.status === 'RESOLVED' || concern.status === 'REJECTED'" 
+                          class="btn btn-sm btn-secondary" 
+                          (click)="reopenConcern(concern.ticketNumber)">
+                    Reopen
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
