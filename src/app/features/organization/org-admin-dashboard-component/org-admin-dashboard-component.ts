@@ -1,7 +1,7 @@
 // org-admin-dashboard-component.ts
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormArray } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormArray, FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { OrganizationService } from '../../../core/services/organization-service';
 import { AuthService } from '../../../core/services/auth-service';
@@ -11,7 +11,8 @@ import { VendorService } from '../../../core/services/vendor-service';
 @Component({
   selector: 'app-org-admin-dashboard-component',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
+
   templateUrl: './org-admin-dashboard-component.html',
   styleUrl: './org-admin-dashboard-component.css',
 })
@@ -52,8 +53,9 @@ showSalaryTemplateModal = false;
 selectedSalaryTemplate: any = null;
 
 //view register employee with other properties
-showEmployeeModal = false;
+//showEmployeeModal = false;
 selectedEmployee: any = null;
+showEmployeeDetailModal = false;
 
 
  //vendor properties section
@@ -69,6 +71,11 @@ vendorPaymentForm!: FormGroup;
 // view payment with other properties
 showPaymentDetailModal = false;
 selectedPaymentRequest: any = null;
+
+//view concern details with other properties
+selectedConcern: any = null;
+showConcernModal = false;
+concernResponseText = '';
 
   private destroy$ = new Subject<void>();
 
@@ -693,8 +700,10 @@ hasDetailedBreakdown(): boolean {
 
 
   // View Employee Details START
-  viewEmployee(employeeId: number): void {
+// ADD THIS METHOD TO LOAD EMPLOYEE DETAILS
+viewEmployeeDetails(employeeId: number): void {
   this.isLoading = true;
+  
   this.orgService.getEmployeeDetails(employeeId)
     .pipe(
       takeUntil(this.destroy$),
@@ -702,8 +711,9 @@ hasDetailedBreakdown(): boolean {
     )
     .subscribe({
       next: (data) => {
+        console.log('Employee Details:', data);
         this.selectedEmployee = data;
-        this.showEmployeeModal = true;
+        this.showEmployeeDetailModal = true;
         this.cdr.detectChanges();
       },
       error: (error) => {
@@ -712,151 +722,62 @@ hasDetailedBreakdown(): boolean {
       }
     });
 }
-closeEmployeeModal(): void {
-  this.showEmployeeModal = false;
+
+closeEmployeeDetailModal(): void {
+  this.showEmployeeDetailModal = false;
   this.selectedEmployee = null;
 }
 
-// Add after closeEmployeeModal() method
-
-viewDocument(fileUrl: string): void {
-  if (!fileUrl) {
-    this.showError('Document URL not available');
-    return;
-  }
-  window.open(fileUrl, '_blank');
+// Helper method to get document count by status
+getDocumentCountByStatus(status: string): number {
+  if (!this.selectedEmployee?.documents) return 0;
+  return this.selectedEmployee.documents.filter((doc: any) => 
+    doc.status?.toUpperCase() === status.toUpperCase()
+  ).length;
 }
 
-verifyEmployeeDocument(employeeId: number, documentId: number): void {
-  if (!confirm('Are you sure you want to approve this document?')) {
+// Helper method to check if all documents are approved
+areAllDocumentsApproved(): boolean {
+  if (!this.selectedEmployee?.documents || this.selectedEmployee.documents.length === 0) {
+    return false;
+  }
+  return this.selectedEmployee.documents.every((doc: any) => 
+    doc.status?.toUpperCase() === 'APPROVED'
+  );
+}
+
+// Helper method to check if bank details are approved
+isBankDetailsApproved(): boolean {
+  return this.selectedEmployee?.bankDetails?.status?.toUpperCase() === 'APPROVED';
+}
+
+// Helper method to check if employee can be activated
+canActivateEmployee(): boolean {
+  return this.areAllDocumentsApproved() && this.isBankDetailsApproved();
+}
+
+// Method to approve/activate employee
+approveEmployee(): void {
+  if (!this.canActivateEmployee()) {
+    this.showError('Cannot activate employee. Please approve all documents and bank details first.');
+    return;
+  }
+
+  if (!confirm(`Are you sure you want to activate ${this.selectedEmployee.name}?`)) {
     return;
   }
 
   this.isLoading = true;
-  const request = { verified: true };
-
-  this.orgService.verifyEmployeeDocument(employeeId, documentId, request)
-    .pipe(
-      takeUntil(this.destroy$),
-      finalize(() => this.isLoading = false)
-    )
-    .subscribe({
-      next: (response) => {
-        this.showSuccess('✅ Document approved successfully');
-        this.viewEmployee(employeeId);
-        this.cdr.detectChanges();
-      },
-      error: (error) => {
-        this.showError(error.error?.message || 'Failed to approve document');
-      }
-    });
-}
-
-rejectEmployeeDocument(employeeId: number, documentId: number): void {
-  const reason = prompt('Please provide a reason for rejection:');
   
-  if (!reason || reason.trim() === '') {
-    this.showError('Rejection reason is required');
-    return;
-  }
-
-  if (!confirm('Are you sure you want to reject this document?')) {
-    return;
-  }
-
-  this.isLoading = true;
-  const request = { verified: false, reason: reason };
-
-  this.orgService.verifyEmployeeDocument(employeeId, documentId, request)
+  this.orgService.completeEmployeeOnboarding(this.selectedEmployee.employeeId)
     .pipe(
       takeUntil(this.destroy$),
       finalize(() => this.isLoading = false)
     )
     .subscribe({
       next: (response) => {
-        this.showSuccess('Document rejected');
-        this.viewEmployee(employeeId);
-        this.cdr.detectChanges();
-      },
-      error: (error) => {
-        this.showError(error.error?.message || 'Failed to reject document');
-      }
-    });
-}
-
-verifyEmployeeBankDetails(employeeId: number): void {
-  if (!confirm('Are you sure you want to approve bank details?')) {
-    return;
-  }
-
-  this.isLoading = true;
-  const request = { verified: true };
-
-  this.orgService.verifyEmployeeBankDetails(employeeId, request)
-    .pipe(
-      takeUntil(this.destroy$),
-      finalize(() => this.isLoading = false)
-    )
-    .subscribe({
-      next: (response) => {
-        this.showSuccess('✅ Bank details approved successfully');
-        this.viewEmployee(employeeId);
-        this.cdr.detectChanges();
-      },
-      error: (error) => {
-        this.showError(error.error?.message || 'Failed to approve bank details');
-      }
-    });
-}
-
-rejectEmployeeBankDetails(employeeId: number): void {
-  const reason = prompt('Please provide a reason for rejection:');
-  
-  if (!reason || reason.trim() === '') {
-    this.showError('Rejection reason is required');
-    return;
-  }
-
-  if (!confirm('Are you sure you want to reject bank details?')) {
-    return;
-  }
-
-  this.isLoading = true;
-  const request = { verified: false, reason: reason };
-
-  this.orgService.verifyEmployeeBankDetails(employeeId, request)
-    .pipe(
-      takeUntil(this.destroy$),
-      finalize(() => this.isLoading = false)
-    )
-    .subscribe({
-      next: (response) => {
-        this.showSuccess('Bank details rejected');
-        this.viewEmployee(employeeId);
-        this.cdr.detectChanges();
-      },
-      error: (error) => {
-        this.showError(error.error?.message || 'Failed to reject bank details');
-      }
-    });
-}
-
-completeEmployeeOnboarding(employeeId: number): void {
-  if (!confirm('Are you sure you want to approve and activate this employee?')) {
-    return;
-  }
-
-  this.isLoading = true;
-
-  this.orgService.completeEmployeeOnboarding(employeeId)
-    .pipe(
-      takeUntil(this.destroy$),
-      finalize(() => this.isLoading = false)
-    )
-    .subscribe({
-      next: (response) => {
-        this.showSuccess('✅ Employee activated successfully!');
-        this.closeEmployeeModal();
+        this.showSuccess('✅ Employee activated successfully');
+        this.closeEmployeeDetailModal();
         this.loadEmployees();
         this.cdr.detectChanges();
       },
@@ -866,19 +787,118 @@ completeEmployeeOnboarding(employeeId: number): void {
     });
 }
 
-canActivateEmployee(): boolean {
-  if (!this.selectedEmployee) return false;
+// Method to verify document
+verifyDocument(documentId: number, approved: boolean): void {
+  const action = approved ? 'approve' : 'reject';
   
-  const allDocsApproved = this.selectedEmployee.documents?.every((doc: any) => doc.status === 'APPROVED') || false;
-  const bankApproved = this.selectedEmployee.bankVerificationStatus === 'APPROVED';
+  // If rejecting, ask for remarks
+  let remarks: string | null = null;
+  if (!approved) {
+    const reason = prompt('Please provide a rejection reason:');
+    if (!reason || reason.trim() === '') {
+      this.showError('Rejection reason is required');
+      return;
+    }
+    remarks = reason.trim();
+  }
+
+  if (!confirm(`Are you sure you want to ${action} this document?`)) {
+    return;
+  }
+
+  this.isLoading = true;
   
-  return allDocsApproved && bankApproved && this.selectedEmployee.status !== 'ACTIVE';
+  // ✅ CORRECT: Send boolean true/false, NOT string "true"/"false"
+  const request = {
+    approved: approved,    // true or false (boolean)
+    remarks: remarks
+  };
+
+  console.log('Verify Document Request:', request);
+
+  this.orgService.verifyEmployeeDocument(
+    this.selectedEmployee.employeeId, 
+    documentId, 
+    request
+  )
+    .pipe(
+      takeUntil(this.destroy$),
+      finalize(() => this.isLoading = false)
+    )
+    .subscribe({
+      next: (response) => {
+        this.showSuccess(`✅ Document ${action}d successfully`);
+        this.viewEmployeeDetails(this.selectedEmployee.employeeId);
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error(`Failed to ${action} document:`, error);
+        this.showError(error.error?.message || `Failed to ${action} document`);
+        this.cdr.detectChanges();
+      }
+    });
 }
 
+// REPLACE YOUR verifyBankDetails METHOD WITH THIS:
 
+verifyBankDetails(approved: boolean): void {
+  const action = approved ? 'approve' : 'reject';
+  
+  // If rejecting, ask for remarks
+  let remarks: string | null = null;
+  if (!approved) {
+    const reason = prompt('Please provide a rejection reason:');
+    if (!reason || reason.trim() === '') {
+      this.showError('Rejection reason is required');
+      return;
+    }
+    remarks = reason.trim();
+  }
 
+  if (!confirm(`Are you sure you want to ${action} bank details?`)) {
+    return;
+  }
+
+  this.isLoading = true;
+  
+  // ✅ CORRECT: Send boolean true/false, NOT string "true"/"false"
+  const request = {
+    approved: approved,    // true or false (boolean)
+    remarks: remarks
+  };
+
+  console.log('Verify Bank Details Request:', request);
+
+  this.orgService.verifyEmployeeBankDetails(
+    this.selectedEmployee.employeeId, 
+    request
+  )
+    .pipe(
+      takeUntil(this.destroy$),
+      finalize(() => this.isLoading = false)
+    )
+    .subscribe({
+      next: (response) => {
+        this.showSuccess(`✅ Bank details ${action}d successfully`);
+        this.viewEmployeeDetails(this.selectedEmployee.employeeId);
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error(`Failed to ${action} bank details:`, error);
+        this.showError(error.error?.message || `Failed to ${action} bank details`);
+        this.cdr.detectChanges();
+      }
+    });
+}
 //END EMployee DETAILS
 
+viewDocument(fileUrl: string): void {
+  if (!fileUrl) {
+    this.showError('Document URL not available');
+    return;
+  }
+  window.open(fileUrl, '_blank');
+}
 
   // Payroll Management
   generatePayroll(month: string): void {
@@ -1201,6 +1221,137 @@ closePaymentDetailModal(): void {
 //vendor methods end
 
 
+//START CONCERN VIEW
+
+// Add these methods after your existing methods
+
+viewConcern(ticketNumber: string): void {
+  this.isLoading = true;
+  this.orgService.getConcernByTicket(ticketNumber)
+    .pipe(
+      takeUntil(this.destroy$),
+      finalize(() => this.isLoading = false)
+    )
+    .subscribe({
+      next: (data) => {
+        this.selectedConcern = data;
+        this.showConcernModal = true;
+        this.concernResponseText = '';
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('Failed to load concern details', error);
+        this.showError('Failed to load concern details');
+      }
+    });
+}
+
+closeConcernModal(): void {
+  this.showConcernModal = false;
+  this.selectedConcern = null;
+  this.concernResponseText = '';
+}
+
+respondToConcern(): void {
+  if (!this.concernResponseText || this.concernResponseText.trim() === '') {
+    this.showError('Please enter a response message');
+    return;
+  }
+
+  if (!confirm('Are you sure you want to respond to this concern?')) {
+    return;
+  }
+
+  this.isLoading = true;
+  this.orgService.respondToConcern(this.selectedConcern.ticketNumber, this.concernResponseText)
+    .pipe(
+      takeUntil(this.destroy$),
+      finalize(() => this.isLoading = false)
+    )
+    .subscribe({
+      next: (response) => {
+        this.showSuccess('✅ Response sent successfully');
+        this.closeConcernModal();
+        this.loadConcerns();
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        this.showError(error.error?.message || 'Failed to send response');
+      }
+    });
+}
+
+resolveConcern(): void {
+  if (!this.concernResponseText || this.concernResponseText.trim() === '') {
+    this.showError('Please enter a resolution message');
+    return;
+  }
+
+  if (!confirm('Are you sure you want to mark this concern as RESOLVED?')) {
+    return;
+  }
+
+  this.isLoading = true;
+  this.orgService.resolveConcern(this.selectedConcern.ticketNumber, this.concernResponseText)
+    .pipe(
+      takeUntil(this.destroy$),
+      finalize(() => this.isLoading = false)
+    )
+    .subscribe({
+      next: (response) => {
+        this.showSuccess('✅ Concern resolved successfully');
+        this.closeConcernModal();
+        this.loadConcerns();
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        this.showError(error.error?.message || 'Failed to resolve concern');
+      }
+    });
+}
+
+rejectConcern(): void {
+  if (!this.concernResponseText || this.concernResponseText.trim() === '') {
+    this.showError('Please enter a rejection reason');
+    return;
+  }
+
+  if (!confirm('Are you sure you want to REJECT this concern?')) {
+    return;
+  }
+
+  this.isLoading = true;
+  this.orgService.rejectConcern(this.selectedConcern.ticketNumber, this.concernResponseText)
+    .pipe(
+      takeUntil(this.destroy$),
+      finalize(() => this.isLoading = false)
+    )
+    .subscribe({
+      next: (response) => {
+        this.showSuccess('✅ Concern rejected');
+        this.closeConcernModal();
+        this.loadConcerns();
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        this.showError(error.error?.message || 'Failed to reject concern');
+      }
+    });
+}
+
+canRespondToConcern(): boolean {
+  if (!this.selectedConcern) return false;
+  const status = this.selectedConcern.status?.toUpperCase();
+  return status === 'OPEN' || status === 'IN_PROGRESS' || status === 'REOPENED';
+}
+
+canResolveOrReject(): boolean {
+  if (!this.selectedConcern) return false;
+  const status = this.selectedConcern.status?.toUpperCase();
+  return status === 'OPEN' || status === 'IN_PROGRESS' || status === 'REOPENED';
+}
+
+//END CONCERN VIEW 
 
   // Disable upload button if documents are already uploaded or under review/approved
   isDocumentUploadDisabled(): boolean {
