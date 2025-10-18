@@ -55,6 +55,7 @@ selectedSalaryTemplate: any = null;
 showEmployeeModal = false;
 selectedEmployee: any = null;
 
+
  //vendor properties section
 vendors: any[] = [];
 vendorPaymentRequests: any[] = [];
@@ -684,17 +685,169 @@ closeEmployeeModal(): void {
   this.selectedEmployee = null;
 }
 
-/*viewDocument(fileUrl: string): void {
+// Add after closeEmployeeModal() method
+
+viewDocument(fileUrl: string): void {
   if (!fileUrl) {
     this.showError('Document URL not available');
     return;
   }
   window.open(fileUrl, '_blank');
-}*/
+}
+
+verifyEmployeeDocument(employeeId: number, documentId: number): void {
+  if (!confirm('Are you sure you want to approve this document?')) {
+    return;
+  }
+
+  this.isLoading = true;
+  const request = { verified: true };
+
+  this.orgService.verifyEmployeeDocument(employeeId, documentId, request)
+    .pipe(
+      takeUntil(this.destroy$),
+      finalize(() => this.isLoading = false)
+    )
+    .subscribe({
+      next: (response) => {
+        this.showSuccess('✅ Document approved successfully');
+        this.viewEmployee(employeeId);
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        this.showError(error.error?.message || 'Failed to approve document');
+      }
+    });
+}
+
+rejectEmployeeDocument(employeeId: number, documentId: number): void {
+  const reason = prompt('Please provide a reason for rejection:');
+  
+  if (!reason || reason.trim() === '') {
+    this.showError('Rejection reason is required');
+    return;
+  }
+
+  if (!confirm('Are you sure you want to reject this document?')) {
+    return;
+  }
+
+  this.isLoading = true;
+  const request = { verified: false, reason: reason };
+
+  this.orgService.verifyEmployeeDocument(employeeId, documentId, request)
+    .pipe(
+      takeUntil(this.destroy$),
+      finalize(() => this.isLoading = false)
+    )
+    .subscribe({
+      next: (response) => {
+        this.showSuccess('Document rejected');
+        this.viewEmployee(employeeId);
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        this.showError(error.error?.message || 'Failed to reject document');
+      }
+    });
+}
+
+verifyEmployeeBankDetails(employeeId: number): void {
+  if (!confirm('Are you sure you want to approve bank details?')) {
+    return;
+  }
+
+  this.isLoading = true;
+  const request = { verified: true };
+
+  this.orgService.verifyEmployeeBankDetails(employeeId, request)
+    .pipe(
+      takeUntil(this.destroy$),
+      finalize(() => this.isLoading = false)
+    )
+    .subscribe({
+      next: (response) => {
+        this.showSuccess('✅ Bank details approved successfully');
+        this.viewEmployee(employeeId);
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        this.showError(error.error?.message || 'Failed to approve bank details');
+      }
+    });
+}
+
+rejectEmployeeBankDetails(employeeId: number): void {
+  const reason = prompt('Please provide a reason for rejection:');
+  
+  if (!reason || reason.trim() === '') {
+    this.showError('Rejection reason is required');
+    return;
+  }
+
+  if (!confirm('Are you sure you want to reject bank details?')) {
+    return;
+  }
+
+  this.isLoading = true;
+  const request = { verified: false, reason: reason };
+
+  this.orgService.verifyEmployeeBankDetails(employeeId, request)
+    .pipe(
+      takeUntil(this.destroy$),
+      finalize(() => this.isLoading = false)
+    )
+    .subscribe({
+      next: (response) => {
+        this.showSuccess('Bank details rejected');
+        this.viewEmployee(employeeId);
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        this.showError(error.error?.message || 'Failed to reject bank details');
+      }
+    });
+}
+
+completeEmployeeOnboarding(employeeId: number): void {
+  if (!confirm('Are you sure you want to approve and activate this employee?')) {
+    return;
+  }
+
+  this.isLoading = true;
+
+  this.orgService.completeEmployeeOnboarding(employeeId)
+    .pipe(
+      takeUntil(this.destroy$),
+      finalize(() => this.isLoading = false)
+    )
+    .subscribe({
+      next: (response) => {
+        this.showSuccess('✅ Employee activated successfully!');
+        this.closeEmployeeModal();
+        this.loadEmployees();
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        this.showError(error.error?.message || 'Failed to activate employee');
+      }
+    });
+}
+
+canActivateEmployee(): boolean {
+  if (!this.selectedEmployee) return false;
+  
+  const allDocsApproved = this.selectedEmployee.documents?.every((doc: any) => doc.status === 'APPROVED') || false;
+  const bankApproved = this.selectedEmployee.bankVerificationStatus === 'APPROVED';
+  
+  return allDocsApproved && bankApproved && this.selectedEmployee.status !== 'ACTIVE';
+}
 
 
 
 //END EMployee DETAILS
+
+
   // Payroll Management
   generatePayroll(month: string): void {
     if (!month) {

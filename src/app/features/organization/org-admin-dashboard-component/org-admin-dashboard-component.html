@@ -722,7 +722,9 @@
                   </div>
                 </td>
                 <td class="text-right">
-                 <button class="btn btn-sm btn-secondary" (click)="viewEmployee(emp.employeeId)">View</button>
+                  <button class="btn btn-sm btn-secondary" (click)="viewEmployee(emp.employeeId)">
+  👁️ View
+</button>
                 </td>
               </tr>
             </tbody>
@@ -1583,83 +1585,224 @@
   </div>
 </div>
 <!--START  view employee -->
-<!-- Employee Details Modal -->
-<div class="employee-modal" *ngIf="showEmployeeModal">
-  <div class="modal-content">
-    <h2>Employee Details</h2>
- <div class="detail-grid">
-  <div class="detail-item">
-    <span class="detail-label">Employee ID:</span>
-    <span class="detail-value">{{ selectedEmployee.employeeId }}</span>
-  </div>
 
-  <div class="detail-item">
-    <span class="detail-label">Name:</span>
-    <span class="detail-value">{{ selectedEmployee.name }}</span>
-  </div>
+<!--START  view employee -->
+<!-- Employee Details Modal with Verification -->
+<div class="modal-overlay" *ngIf="showEmployeeModal" (click)="closeEmployeeModal()">
+  <div class="modal modal-xlarge" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>👤 Employee Verification</h3>
+      <button class="modal-close" (click)="closeEmployeeModal()">×</button>
+    </div>
+    
+    <div class="modal-body" *ngIf="selectedEmployee">
+      
+      <!-- Personal Information -->
+      <div class="verification-section">
+        <div class="section-header-inline">
+          <h4>📋 Personal Information</h4>
+        </div>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Employee ID</span>
+            <span class="info-value">#{{ selectedEmployee.employeeId }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Full Name</span>
+            <span class="info-value">{{ selectedEmployee.firstName }} {{ selectedEmployee.lastName }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Email</span>
+            <span class="info-value">{{ selectedEmployee.email }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Date of Birth</span>
+            <span class="info-value">{{ selectedEmployee.dob | date:'mediumDate' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Department</span>
+            <span class="info-value">{{ selectedEmployee.department }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Designation</span>
+            <span class="info-value">{{ selectedEmployee.designation }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Status</span>
+            <span class="status-badge" [ngClass]="selectedEmployee.status?.toLowerCase()">
+              {{ selectedEmployee.status }}
+            </span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Username</span>
+            <span class="info-value">{{ selectedEmployee.username }}</span>
+          </div>
+        </div>
+      </div>
 
-  <div class="detail-item" *ngIf="selectedEmployee.email">
-    <span class="detail-label">Email:</span>
-    <span class="detail-value">{{ selectedEmployee.email }}</span>
-  </div>
+      <!-- Bank Details Section -->
+      <div class="verification-section" *ngIf="selectedEmployee.bankAccountNumber">
+        <div class="section-header-inline">
+          <h4>🏦 Bank Details</h4>
+          <span class="verification-badge" [ngClass]="selectedEmployee.bankVerificationStatus?.toLowerCase()">
+            {{ selectedEmployee.bankVerificationStatus || 'PENDING' }}
+          </span>
+        </div>
+        
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Account Holder Name</span>
+            <span class="info-value">{{ selectedEmployee.accountHolderName }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Account Number</span>
+            <span class="info-value">{{ selectedEmployee.bankAccountNumber }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">IFSC Code</span>
+            <span class="info-value">{{ selectedEmployee.ifscCode }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Bank Name</span>
+            <span class="info-value">{{ selectedEmployee.bankName }}</span>
+          </div>
+        </div>
 
-  <div class="detail-item" *ngIf="selectedEmployee.phoneNumber">
-    <span class="detail-label">Phone Number:</span>
-    <span class="detail-value">{{ selectedEmployee.phoneNumber }}</span>
-  </div>
+        <div class="action-buttons" *ngIf="selectedEmployee.bankVerificationStatus === 'PENDING'">
+          <button class="btn btn-success" (click)="verifyEmployeeBankDetails(selectedEmployee.employeeId)">
+            ✅ Approve Bank Details
+          </button>
+          <button class="btn btn-danger" (click)="rejectEmployeeBankDetails(selectedEmployee.employeeId)">
+            ❌ Reject Bank Details
+          </button>
+        </div>
+      </div>
 
-  <div class="detail-item" *ngIf="selectedEmployee.designation">
-    <span class="detail-label">Designation:</span>
-    <span class="detail-value">{{ selectedEmployee.designation }}</span>
-  </div>
+      <!-- Documents Section -->
+      <div class="verification-section">
+        <div class="section-header-inline">
+          <h4>📄 Documents ({{ selectedEmployee.documents?.length || 0 }})</h4>
+        </div>
 
-  <div class="detail-item" *ngIf="selectedEmployee.department">
-    <span class="detail-label">Department:</span>
-    <span class="detail-value">{{ selectedEmployee.department }}</span>
-  </div>
+        <div class="documents-list" *ngIf="selectedEmployee.documents && selectedEmployee.documents.length > 0">
+          <div class="document-card" *ngFor="let doc of selectedEmployee.documents">
+            <div class="document-header">
+              <div class="document-info">
+                <h5>{{ doc.documentName || doc.fileName }}</h5>
+                <p class="document-type">{{ doc.documentType || doc.fileType }}</p>
+                <p class="document-date">Uploaded: {{ doc.uploadedAt | date:'short' }}</p>
+              </div>
+              <span class="verification-badge" [ngClass]="doc.status?.toLowerCase()">
+                {{ doc.status }}
+              </span>
+            </div>
 
-  <div class="detail-item" *ngIf="selectedEmployee.dateOfJoining">
-    <span class="detail-label">Date of Joining:</span>
-    <span class="detail-value">{{ selectedEmployee.dateOfJoining | date:'mediumDate' }}</span>
-  </div>
+            <div class="rejection-alert" *ngIf="doc.status === 'REJECTED' && doc.rejectionReason">
+              <strong>❌ Rejection Reason:</strong> {{ doc.rejectionReason }}
+            </div>
 
-  <div class="detail-item">
-    <span class="detail-label">Status:</span>
-    <span
-      class="detail-value status"
-      [ngClass]="{
-        'pending': selectedEmployee.status === 'PENDING',
-        'approved': selectedEmployee.status === 'APPROVED',
-        'rejected': selectedEmployee.status === 'REJECTED'
-      }"
-    >
-      {{ selectedEmployee.status }}
-    </span>
-  </div>
+            <div class="document-actions">
+              <button class="btn btn-sm btn-secondary" (click)="viewDocument(doc.fileUrl)" *ngIf="doc.fileUrl">
+                👁️ View
+              </button>
+              <button 
+                class="btn btn-sm btn-success" 
+                (click)="verifyEmployeeDocument(selectedEmployee.employeeId, doc.documentId)"
+                *ngIf="doc.status === 'PENDING'">
+                ✅ Approve
+              </button>
+              <button 
+                class="btn btn-sm btn-danger" 
+                (click)="rejectEmployeeDocument(selectedEmployee.employeeId, doc.documentId)"
+                *ngIf="doc.status === 'PENDING'">
+                ❌ Reject
+              </button>
+            </div>
+          </div>
+        </div>
 
-  <div class="detail-item">
-    <span class="detail-label">Bank Details:</span>
-    <span class="detail-value">
-      {{ selectedEmployee.bankDetails || 'No bank details available' }}
-    </span>
-  </div>
+        <div class="no-data-message" *ngIf="!selectedEmployee.documents || selectedEmployee.documents.length === 0">
+          <p>📭 No documents uploaded yet</p>
+        </div>
+      </div>
 
-  <div class="detail-item">
-    <span class="detail-label">Documents:</span>
-    <span class="detail-value">
-      {{ selectedEmployee.documents?.length ? selectedEmployee.documents.length + ' uploaded' : 'No documents uploaded' }}
-    </span>
-  </div>
-</div>
+      <!-- Salary Information -->
+      <div class="verification-section" *ngIf="selectedEmployee.grossSalary">
+        <div class="section-header-inline">
+          <h4>💰 Salary Information</h4>
+        </div>
+        <div class="salary-grid">
+          <div class="salary-item">
+            <span class="salary-label">Basic Salary</span>
+            <span class="salary-value">₹{{ selectedEmployee.basicSalary | number:'1.2-2' }}</span>
+          </div>
+          <div class="salary-item">
+            <span class="salary-label">HRA</span>
+            <span class="salary-value">₹{{ selectedEmployee.hra | number:'1.2-2' }}</span>
+          </div>
+          <div class="salary-item">
+            <span class="salary-label">DA</span>
+            <span class="salary-value">₹{{ selectedEmployee.da | number:'1.2-2' }}</span>
+          </div>
+          <div class="salary-item">
+            <span class="salary-label">PF</span>
+            <span class="salary-value">₹{{ selectedEmployee.pf | number:'1.2-2' }}</span>
+          </div>
+          <div class="salary-item highlight">
+            <span class="salary-label">Gross Salary</span>
+            <span class="salary-value">₹{{ selectedEmployee.grossSalary | number:'1.2-2' }}</span>
+          </div>
+          <div class="salary-item highlight success">
+            <span class="salary-label">Net Salary</span>
+            <span class="salary-value">₹{{ selectedEmployee.netSalary | number:'1.2-2' }}</span>
+          </div>
+        </div>
+      </div>
 
+      <!-- Employee Action Section -->
+      <div class="verification-section employee-action-section" *ngIf="selectedEmployee.status !== 'ACTIVE'">
+        <div class="section-header-inline">
+          <h4>⚡ Employee Action</h4>
+        </div>
+        
+        <div class="completion-status">
+          <div class="status-message" *ngIf="!canActivateEmployee()">
+            <span class="warning-icon">⚠️</span>
+            <p>Please verify all documents and bank details before activating the employee.</p>
+          </div>
+          <div class="status-message success" *ngIf="canActivateEmployee()">
+            <span class="success-icon">✅</span>
+            <p>All verifications complete! You can now activate this employee.</p>
+          </div>
+        </div>
 
-    <div class="modal-actions">
-      <button class="btn-close" (click)="closeEmployeeModal()">Close</button>
+        <button 
+          class="btn btn-lg btn-primary btn-activate"
+          (click)="completeEmployeeOnboarding(selectedEmployee.employeeId)"
+          [disabled]="!canActivateEmployee() || isLoading">
+          <span *ngIf="!isLoading">✅ Approve Employee & Activate</span>
+          <span *ngIf="isLoading">Processing...</span>
+        </button>
+      </div>
+
+      <!-- Already Active Message -->
+      <div class="verification-section" *ngIf="selectedEmployee.status === 'ACTIVE'">
+        <div class="completion-status">
+          <div class="status-message success">
+            <span class="success-icon">🎉</span>
+            <p>This employee is already <strong>ACTIVE</strong> and ready for payroll.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeEmployeeModal()">Close</button>
     </div>
   </div>
 </div>
-
-
 <!--end  view employee -->
+
 </div>
 
