@@ -558,17 +558,49 @@ openDocumentModal(): void {
       });
   }
 //view salary   
-  viewSalaryTemplate(template: any): void {
-  // Use the template data from the list instead of making API call
+// REPLACE YOUR viewSalaryTemplate METHOD WITH THIS ENHANCED VERSION:
+
+viewSalaryTemplate(template: any): void {
+  // Show modal immediately with available data
   this.selectedSalaryTemplate = template;
   this.showSalaryTemplateModal = true;
-  this.cdr.detectChanges();
+  
+  // Try to fetch full details from API (with error handling)
+  this.isLoading = true;
+  
+  this.orgService.getSalaryTemplateById(template.templateId)
+    .pipe(
+      takeUntil(this.destroy$),
+      finalize(() => this.isLoading = false)
+    )
+    .subscribe({
+      next: (data) => {
+        // Update with full details if available
+        this.selectedSalaryTemplate = data;
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('Failed to load full salary template details', error);
+        // Don't show error message, just use the basic data we already have
+        // The modal will show gross and net salary at minimum
+        this.cdr.detectChanges();
+      }
+    });
 }
 
+// Keep this method as is:
 closeSalaryTemplateModal(): void {
   this.showSalaryTemplateModal = false;
   this.selectedSalaryTemplate = null;
 }
+
+// ADD THIS HELPER METHOD to check if detailed breakdown is available:
+hasDetailedBreakdown(): boolean {
+  return this.selectedSalaryTemplate && 
+         (this.selectedSalaryTemplate.basicSalary !== undefined || 
+          this.selectedSalaryTemplate.hra !== undefined);
+}
+//end of view salary
 
 
 

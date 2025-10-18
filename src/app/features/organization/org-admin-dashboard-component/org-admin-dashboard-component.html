@@ -1532,6 +1532,10 @@
 </div>
 
 <!-- Salary Template View Modal -->
+
+<!-- REPLACE YOUR Salary Template View Modal WITH THIS: -->
+
+<!-- Salary Template View Modal -->
 <div class="modal-overlay" *ngIf="showSalaryTemplateModal" (click)="closeSalaryTemplateModal()">
   <div class="modal" (click)="$event.stopPropagation()">
     <div class="modal-header">
@@ -1540,6 +1544,7 @@
     </div>
     <div class="modal-body" *ngIf="selectedSalaryTemplate">
       <div class="template-details">
+        <!-- Basic Info -->
         <div class="detail-row">
           <span class="detail-label">Template ID:</span>
           <span class="detail-value">#{{ selectedSalaryTemplate.templateId }}</span>
@@ -1548,26 +1553,41 @@
           <span class="detail-label">Designation:</span>
           <span class="detail-value">{{ selectedSalaryTemplate.designation }}</span>
         </div>
-        <div class="detail-row" *ngIf="selectedSalaryTemplate.basicSalary">
-          <span class="detail-label">Basic Salary:</span>
-          <span class="detail-value">₹{{ selectedSalaryTemplate.basicSalary | number:'1.2-2' }}</span>
+
+        <!-- Detailed Breakdown (if available) -->
+        <div *ngIf="hasDetailedBreakdown()">
+          <hr style="margin: 15px 0; border: 1px solid #e2e8f0;">
+          <h4 style="margin: 15px 0 10px 0; color: #475569; font-size: 0.95rem;">Salary Breakdown</h4>
+          
+          <div class="detail-row" *ngIf="selectedSalaryTemplate.basicSalary">
+            <span class="detail-label">Basic Salary:</span>
+            <span class="detail-value">₹{{ selectedSalaryTemplate.basicSalary | number:'1.2-2' }}</span>
+          </div>
+          <div class="detail-row" *ngIf="selectedSalaryTemplate.hra">
+            <span class="detail-label">HRA:</span>
+            <span class="detail-value">₹{{ selectedSalaryTemplate.hra | number:'1.2-2' }}</span>
+          </div>
+          <div class="detail-row" *ngIf="selectedSalaryTemplate.da">
+            <span class="detail-label">DA:</span>
+            <span class="detail-value">₹{{ selectedSalaryTemplate.da | number:'1.2-2' }}</span>
+          </div>
+          <div class="detail-row" *ngIf="selectedSalaryTemplate.pf">
+            <span class="detail-label">PF Deduction:</span>
+            <span class="detail-value text-danger">-₹{{ selectedSalaryTemplate.pf | number:'1.2-2' }}</span>
+          </div>
+          <div class="detail-row" *ngIf="selectedSalaryTemplate.otherAllowances">
+            <span class="detail-label">Other Allowances:</span>
+            <span class="detail-value">₹{{ selectedSalaryTemplate.otherAllowances | number:'1.2-2' }}</span>
+          </div>
         </div>
-        <div class="detail-row" *ngIf="selectedSalaryTemplate.hra">
-          <span class="detail-label">HRA:</span>
-          <span class="detail-value">₹{{ selectedSalaryTemplate.hra | number:'1.2-2' }}</span>
+
+        <!-- Info message when breakdown not available -->
+        <div *ngIf="!hasDetailedBreakdown()" class="info-message">
+          <span class="info-icon">ℹ️</span>
+          <span>Detailed salary breakdown is not available. Showing summary only.</span>
         </div>
-        <div class="detail-row" *ngIf="selectedSalaryTemplate.da">
-          <span class="detail-label">DA:</span>
-          <span class="detail-value">₹{{ selectedSalaryTemplate.da | number:'1.2-2' }}</span>
-        </div>
-        <div class="detail-row" *ngIf="selectedSalaryTemplate.pf">
-          <span class="detail-label">PF:</span>
-          <span class="detail-value">₹{{ selectedSalaryTemplate.pf | number:'1.2-2' }}</span>
-        </div>
-        <div class="detail-row" *ngIf="selectedSalaryTemplate.otherAllowances">
-          <span class="detail-label">Other Allowances:</span>
-          <span class="detail-value">₹{{ selectedSalaryTemplate.otherAllowances | number:'1.2-2' }}</span>
-        </div>
+
+        <!-- Summary (always shown) -->
         <hr style="margin: 15px 0; border: 1px solid #e2e8f0;">
         <div class="detail-row highlight">
           <span class="detail-label"><strong>Gross Salary:</strong></span>
@@ -1584,7 +1604,8 @@
     </div>
   </div>
 </div>
-<!--START  view employee -->
+ 
+<!--end  view salary template-->
 
 <!--START  view employee -->
 <!-- Employee Details Modal with Verification -->
