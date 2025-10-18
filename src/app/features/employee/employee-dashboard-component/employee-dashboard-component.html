@@ -327,6 +327,11 @@
           <h3>🏦 Bank Account Details</h3>
           <button class="modal-close" (click)="closeBankModal()">×</button>
         </div>
+        <div *ngIf="errorMessage" class="alert alert-error">
+          <span class="alert-icon">✕</span>
+          {{ errorMessage }}
+          <button class="close-btn" (click)="clearMessages()">×</button>
+        </div>
         <div class="modal-body">
           <form [formGroup]="bankDetailsForm">
             <div class="form-group">

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { RecaptchaModule } from 'ng-recaptcha';
@@ -23,7 +23,9 @@ export class LoginComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+     private cdr: ChangeDetectorRef
+    
   ) {
     this.loginForm = this.fb.group({
       userName: ['', [Validators.required, Validators.minLength(3)]],
@@ -96,7 +98,9 @@ export class LoginComponent implements OnInit {
       },
       error: (err) => {
         this.isLoading = false;
-        this.errorMessage = err.error?.message || 'Invalid username or password!';
+        this.errorMessage = err.error?.message||err.error?.error || 'Invalid username or password!';
+        this.cdr.detectChanges();
+        
       }
     });
   }

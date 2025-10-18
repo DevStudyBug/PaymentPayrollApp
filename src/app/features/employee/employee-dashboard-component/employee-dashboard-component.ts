@@ -301,8 +301,11 @@ export class EmployeeDashboardComponent implements OnInit, OnDestroy {
           this.loadOnboardingStatus();
           this.cdr.detectChanges();
         },
-        error: (error) =>
-          this.showError(error.error?.message || '❌ Failed to submit bank details'),
+        error: (error) => {
+          this.isLoading = false
+          this.showError(error.error?.message||error.error?.error || '❌ Failed to submit bank details');
+           this.cdr.detectChanges();
+        },
       });
   }
 

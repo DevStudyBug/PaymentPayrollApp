@@ -844,9 +844,8 @@ export class OrgAdminDashboardComponent implements OnInit {
   // Method to verify document
   verifyDocument(documentId: number, approved: boolean): void {
     const action = approved ? 'approve' : 'reject';
-
-    // If rejecting, ask for remarks
     let remarks: string | null = null;
+
     if (!approved) {
       const reason = prompt('Please provide a rejection reason:');
       if (!reason || reason.trim() === '') {
@@ -856,36 +855,31 @@ export class OrgAdminDashboardComponent implements OnInit {
       remarks = reason.trim();
     }
 
-    if (!confirm(`Are you sure you want to ${action} this document?`)) {
-      return;
-    }
+    if (!confirm(`Are you sure you want to ${action} this document?`)) return;
 
     this.isLoading = true;
 
-    // ✅ CORRECT: Send boolean true/false, NOT string "true"/"false"
-    const request = {
-      approved: approved, // true or false (boolean)
-      remarks: remarks,
-    };
-
-    console.log('Verify Document Request:', request);
+    const request = { approved, remarks };
 
     this.orgService
       .verifyEmployeeDocument(this.selectedEmployee.employeeId, documentId, request)
       .pipe(
         takeUntil(this.destroy$),
-        finalize(() => (this.isLoading = false))
+        finalize(() => {
+          setTimeout(() => {
+            this.isLoading = false;
+            this.cdr.detectChanges();
+          });
+        })
       )
       .subscribe({
-        next: (response) => {
+        next: (res) => {
           this.showSuccess(`✅ Document ${action}d successfully`);
           this.viewEmployeeDetails(this.selectedEmployee.employeeId);
-          this.cdr.detectChanges();
         },
-        error: (error) => {
-          console.error(`Failed to ${action} document:`, error);
-          this.showError(error.error?.message || `Failed to ${action} document`);
-          this.cdr.detectChanges();
+        error: (err) => {
+          console.error(`Failed to ${action} document:`, err);
+          this.showError(err.error?.message || `Failed to ${action} document`);
         },
       });
   }
@@ -969,12 +963,12 @@ export class OrgAdminDashboardComponent implements OnInit {
       )
       .subscribe({
         next: (response) => {
-          this.isLoading = false
+          this.isLoading = false;
           this.showSuccess(response.message || '✅ Payroll generated successfully');
           this.cdr.detectChanges();
         },
         error: (error) => {
-          this.isLoading = false
+          this.isLoading = false;
           this.showError(error.error?.message || 'Failed to generate payroll');
           this.cdr.detectChanges();
         },
@@ -1000,10 +994,12 @@ export class OrgAdminDashboardComponent implements OnInit {
       )
       .subscribe({
         next: (response) => {
+          this.isLoading = false
           this.showSuccess(response.message || '✅ Payroll submitted to bank successfully');
           this.cdr.detectChanges();
         },
         error: (error) => {
+          this.isLoading = false
           this.showError(error.error?.message || 'Failed to submit payroll');
           this.cdr.detectChanges();
         },
